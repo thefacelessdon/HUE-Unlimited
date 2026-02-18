@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/utils/formatting";
@@ -35,13 +36,11 @@ export default async function OutputsPage() {
   const drafts = outputs.filter((o) => !o.is_published);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Outputs</h1>
-        <p className="text-sm text-muted mt-1">
-          Briefs, frameworks, and deliverables
-        </p>
-      </div>
+    <div className="space-y-section">
+      <PageHeader
+        title="Outputs"
+        subtitle="Briefs, analyses, and frameworks we've produced from the intelligence."
+      />
 
       {/* Published outputs */}
       <Card>
@@ -59,7 +58,7 @@ export default async function OutputsPage() {
             {published.map((o) => (
               <div
                 key={o.id}
-                className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -105,7 +104,7 @@ export default async function OutputsPage() {
             {drafts.map((o) => (
               <div
                 key={o.id}
-                className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/utils/formatting";
@@ -37,13 +38,11 @@ export default async function NarrativesPage() {
   const aligned = narratives.filter((n) => n.gap === "aligned").length;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Narratives</h1>
-        <p className="text-sm text-muted mt-1">
-          Track institutional narratives vs. on-the-ground reality
-        </p>
-      </div>
+    <div className="space-y-section">
+      <PageHeader
+        title="Narratives"
+        subtitle="What's being said about this ecosystem versus what's actually happening."
+      />
 
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -83,7 +82,7 @@ export default async function NarrativesPage() {
             {narratives.map((n) => (
               <div
                 key={n.id}
-                className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -118,7 +117,7 @@ export default async function NarrativesPage() {
                       )}
                     </div>
                     {n.evidence_notes && (
-                      <p className="text-xs text-dim mt-2 border-l-2 border-accent-dim/30 pl-2">
+                      <p className="text-xs text-dim mt-2 border-l-2 border-accent-warm/30 pl-2">
                         {n.evidence_notes}
                       </p>
                     )}

@@ -55,7 +55,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-surface flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-text">
+          <h1 className="font-display text-2xl font-semibold text-text">
             Cultural Architecture Toolkit
           </h1>
           <p className="mt-2 text-muted text-sm">
@@ -64,7 +64,7 @@ export default function LoginPage() {
         </div>
 
         {sent ? (
-          <div className="bg-card border border-border rounded-lg p-6">
+          <div className="bg-surface-card border border-border rounded-lg p-6">
             <div className="text-status-green text-sm font-medium mb-1">
               Check your email
             </div>
@@ -74,14 +74,14 @@ export default function LoginPage() {
             </p>
             <button
               onClick={() => setSent(false)}
-              className="mt-4 text-accent text-sm hover:text-accent-dim transition-colors"
+              className="mt-4 text-accent text-sm hover:text-accent-warm transition-colors"
             >
               Use a different email
             </button>
           </div>
         ) : (
           <form onSubmit={handleLogin}>
-            <div className="bg-card border border-border rounded-lg p-6">
+            <div className="bg-surface-card border border-border rounded-lg p-6">
               <label
                 htmlFor="email"
                 className="block text-sm text-muted mb-2"
@@ -124,7 +124,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-4 w-full bg-accent text-surface font-medium text-sm rounded px-4 py-2 hover:bg-accent-dim transition-colors disabled:opacity-50"
+                className="mt-4 w-full bg-accent text-surface font-medium text-sm rounded px-4 py-2 hover:bg-accent-warm transition-colors disabled:opacity-50"
               >
                 {loading
                   ? mode === "password"

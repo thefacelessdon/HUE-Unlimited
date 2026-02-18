@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { ORG_TYPE_LABELS } from "@/lib/utils/constants";
 import type { Organization, Practitioner } from "@/lib/supabase/types";
 
@@ -31,13 +32,8 @@ export default async function EcosystemMapPage() {
   const practitionerList = (practitioners as Practitioner[]) || [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Ecosystem Map</h1>
-        <p className="text-sm text-muted mt-1">
-          Organizations and practitioners in the ecosystem
-        </p>
-      </div>
+    <div className="space-y-section">
+      <PageHeader title="Ecosystem Map" subtitle="Every institution, funder, and practitioner in the system — and how they connect." />
 
       {/* Organizations */}
       <Card>
@@ -55,7 +51,7 @@ export default async function EcosystemMapPage() {
             {organizations.map((org) => (
               <div
                 key={org.id}
-                className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -79,7 +75,7 @@ export default async function EcosystemMapPage() {
                       href={org.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-accent hover:text-accent-dim shrink-0"
+                      className="text-xs text-accent hover:text-accent-warm shrink-0"
                     >
                       Website
                     </a>
@@ -115,7 +111,7 @@ export default async function EcosystemMapPage() {
             {practitionerList.map((p) => (
               <div
                 key={p.id}
-                className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

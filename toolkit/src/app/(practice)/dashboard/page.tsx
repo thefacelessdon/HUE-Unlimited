@@ -1,6 +1,7 @@
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { StatsBar } from "@/components/practice/StatsBar";
 import {
   getEcosystemStats,
@@ -49,14 +50,9 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-section">
       {/* Page header */}
-      <div>
-        <h1 className="text-xl font-semibold text-text">Dashboard</h1>
-        <p className="text-sm text-muted mt-1">
-          {stats?.name || "Ecosystem"} overview
-        </p>
-      </div>
+      <PageHeader title="Dashboard" subtitle="The state of the NWA cultural ecosystem at a glance." />
 
       {/* Stats bar */}
       <StatsBar stats={stats} />
@@ -85,7 +81,7 @@ export default async function DashboardPage() {
                 return (
                   <div
                     key={d.id}
-                    className="border border-border rounded-lg p-3 hover:border-dim/50 transition-colors"
+                    className="border border-border rounded-lg p-3 hover:border-border-medium transition-colors"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
@@ -130,7 +126,7 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                     {d.intervention_needed && (
-                      <p className="text-xs text-muted mt-2 ml-4 border-l-2 border-accent-dim/30 pl-2">
+                      <p className="text-xs text-muted mt-2 ml-4 border-l-2 border-accent-warm/30 pl-2">
                         {d.intervention_needed}
                       </p>
                     )}
@@ -154,7 +150,7 @@ export default async function DashboardPage() {
               {staleEntries.map((entry) => (
                 <div
                   key={`${entry.entity_type}-${entry.entity_id}`}
-                  className="flex items-center justify-between py-2 px-2 rounded hover:bg-surface/50 transition-colors"
+                  className="flex items-center justify-between py-2 px-2 rounded hover:bg-surface-elevated/50 transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <StatusDot color="orange" />
@@ -194,7 +190,7 @@ export default async function DashboardPage() {
                 return (
                   <div
                     key={entry.id}
-                    className="flex items-center justify-between py-2 px-2 rounded hover:bg-surface/50 transition-colors"
+                    className="flex items-center justify-between py-2 px-2 rounded hover:bg-surface-elevated/50 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span

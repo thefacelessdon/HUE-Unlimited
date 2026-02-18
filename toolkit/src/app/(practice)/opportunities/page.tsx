@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatCurrency, formatDate } from "@/lib/utils/formatting";
@@ -41,13 +42,11 @@ export default async function OpportunitiesPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Opportunities</h1>
-        <p className="text-sm text-muted mt-1">
-          Grants, commissions, and funding opportunities
-        </p>
-      </div>
+    <div className="space-y-section">
+      <PageHeader
+        title="Opportunities"
+        subtitle="Every open grant, commission, RFP, and residency flowing through the ecosystem."
+      />
 
       {/* Open Opportunities */}
       <Card>
@@ -65,7 +64,7 @@ export default async function OpportunitiesPage() {
             {openOpps.map((opp) => (
               <div
                 key={opp.id}
-                className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -129,7 +128,7 @@ export default async function OpportunitiesPage() {
             {closedOpps.map((opp) => (
               <div
                 key={opp.id}
-                className="flex items-center justify-between py-2 px-2 rounded hover:bg-surface/50 transition-colors"
+                className="flex items-center justify-between py-2 px-2 rounded hover:bg-surface-elevated/50 transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-sm text-text truncate">

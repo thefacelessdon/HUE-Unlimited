@@ -3,6 +3,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { formatDate, daysUntil } from "@/lib/utils/formatting";
 import { DECISION_STATUS_LABELS } from "@/lib/utils/constants";
 import type { Decision } from "@/lib/supabase/types";
@@ -42,13 +43,8 @@ export default async function DecisionsPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Decisions</h1>
-        <p className="text-sm text-muted mt-1">
-          Track decision timelines and intervention windows
-        </p>
-      </div>
+    <div className="space-y-section">
+      <PageHeader title="Decisions" subtitle="What's being decided right now, when it locks, and where we need to show up." />
 
       {/* Active decisions */}
       <Card>
@@ -75,7 +71,7 @@ export default async function DecisionsPage() {
               return (
                 <div
                   key={d.id}
-                  className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                  className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -127,7 +123,7 @@ export default async function DecisionsPage() {
                     </div>
                   </div>
                   {d.intervention_needed && (
-                    <p className="text-xs text-muted mt-2 ml-4 border-l-2 border-accent-dim/30 pl-2">
+                    <p className="text-xs text-muted mt-2 ml-4 border-l-2 border-accent-warm/30 pl-2">
                       {d.intervention_needed}
                     </p>
                   )}
@@ -154,7 +150,7 @@ export default async function DecisionsPage() {
             {completedDecisions.map((d) => (
               <div
                 key={d.id}
-                className="flex items-center justify-between py-2 px-2 rounded hover:bg-surface/50 transition-colors"
+                className="flex items-center justify-between py-2 px-2 rounded hover:bg-surface-elevated/50 transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <StatusDot color={statusColor(d.status)} />

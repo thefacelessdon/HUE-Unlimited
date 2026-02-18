@@ -48,7 +48,7 @@ export function Table<T>({
               onClick={() => onRowClick?.(row)}
               className={`border-b border-border/50 ${
                 onRowClick
-                  ? "cursor-pointer hover:bg-surface/50 transition-colors"
+                  ? "cursor-pointer hover:bg-surface-elevated/50 transition-colors"
                   : ""
               }`}
             >

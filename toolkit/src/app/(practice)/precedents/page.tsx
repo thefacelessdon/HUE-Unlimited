@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/utils/formatting";
 import type { Precedent } from "@/lib/supabase/types";
@@ -22,13 +23,11 @@ export default async function PrecedentsPage() {
   const precedents = (data as Precedent[]) || [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Precedents</h1>
-        <p className="text-sm text-muted mt-1">
-          Historical patterns and lessons from past initiatives
-        </p>
-      </div>
+    <div className="space-y-section">
+      <PageHeader
+        title="Precedents"
+        subtitle="What's been tried before. The institutional memory that prevents starting from scratch."
+      />
 
       <Card>
         <CardHeader
@@ -45,7 +44,7 @@ export default async function PrecedentsPage() {
             {precedents.map((p) => (
               <div
                 key={p.id}
-                className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">

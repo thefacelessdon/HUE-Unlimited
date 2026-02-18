@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { formatCurrency } from "@/lib/utils/formatting";
 import {
   INVESTMENT_STATUS_LABELS,
@@ -53,13 +54,8 @@ export default async function InvestmentsPage() {
   ).length;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Investments</h1>
-        <p className="text-sm text-muted mt-1">
-          Track investment flows and their compounding effects
-        </p>
-      </div>
+    <div className="space-y-section">
+      <PageHeader title="Investments" subtitle="Where money is going, what it's producing, and whether it's compounding." />
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -105,7 +101,7 @@ export default async function InvestmentsPage() {
             {investments.map((inv) => (
               <div
                 key={inv.id}
-                className="border border-border rounded-lg p-4 hover:border-dim/50 transition-colors"
+                className="border border-border rounded-lg p-4 hover:border-border-medium transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -145,7 +141,7 @@ export default async function InvestmentsPage() {
                   </div>
                 </div>
                 {inv.outcome && (
-                  <p className="text-xs text-muted mt-2 border-l-2 border-accent-dim/30 pl-2">
+                  <p className="text-xs text-muted mt-2 border-l-2 border-accent-warm/30 pl-2">
                     {inv.outcome}
                   </p>
                 )}

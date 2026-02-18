@@ -2,22 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  color: #E8E8E8;
-  background: #0F0F0F;
+/* ─── CSS Custom Properties ───────────────────────── */
+:root {
+  --bg-primary: #0C0C0C;
+  --bg-surface: #141414;
+  --bg-elevated: #1A1A1A;
+  --bg-inset: #0A0A0A;
+  --border-subtle: #1F1F1F;
+  --border-medium: #2A2A2A;
+  --border-accent: #3D3224;
+  --text-primary: #E8E4E0;
+  --text-secondary: #9A9590;
+  --text-tertiary: #5C5854;
+  --accent-gold: #C4A67A;
+  --accent-warm: #A68B5B;
+  --accent-glow: rgba(196, 166, 122, 0.08);
+  --status-green: #6B9E6A;
+  --status-red: #C45B5B;
+  --status-blue: #6B8EC4;
+  --status-orange: #C49B6B;
+  --status-purple: #9B7EC4;
 }
 
-/* Scrollbar */
+/* ─── Base styles ─────────────────────────────────── */
+body {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  font-family: var(--font-body), sans-serif;
+}
+
+/* ─── Typography ──────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: var(--font-display), serif;
+}
+
+/* ─── Page transitions ────────────────────────────── */
+.page-content {
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Scrollbar ───────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0F0F0F;
+  background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2A2A;
+  background: var(--border-medium);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #666666;
+  background: var(--text-tertiary);
+}
+
+/* ─── Status badge glow ──────────────────────────── */
+.badge-glow-green {
+  box-shadow: 0 0 6px rgba(107, 158, 106, 0.15);
+}
+.badge-glow-red {
+  box-shadow: 0 0 6px rgba(196, 91, 91, 0.15);
+}
+.badge-glow-blue {
+  box-shadow: 0 0 6px rgba(107, 142, 196, 0.15);
+}
+.badge-glow-orange {
+  box-shadow: 0 0 6px rgba(196, 155, 107, 0.15);
+}
+.badge-glow-purple {
+  box-shadow: 0 0 6px rgba(155, 126, 196, 0.15);
 }

@@ -19,12 +19,12 @@ export default async function PracticeLayout({
   return (
     <div className="min-h-screen bg-surface">
       <Sidebar />
-      <main className="ml-56">
+      <main className="ml-60">
         {/* Header bar */}
-        <header className="sticky top-0 z-10 bg-surface/80 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
+        <header className="sticky top-0 z-10 bg-surface/80 backdrop-blur border-b border-border px-8 py-3 flex items-center justify-between">
           <div />
           <div className="flex items-center gap-3">
-            <span className="text-xs text-dim">{user.email}</span>
+            <span className="text-xs text-dim font-body">{user.email}</span>
             <form action="/auth/logout" method="POST">
               <button
                 type="submit"
@@ -36,7 +36,9 @@ export default async function PracticeLayout({
           </div>
         </header>
         {/* Page content */}
-        <div className="p-6">{children}</div>
+        <div className="p-8 max-w-content page-content">
+          {children}
+        </div>
       </main>
     </div>
   );
