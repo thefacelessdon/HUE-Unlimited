@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { formatCurrency, formatDate } from "@/lib/utils/formatting";
+import { formatCurrency } from "@/lib/utils/formatting";
 import {
   INVESTMENT_STATUS_LABELS,
   COMPOUNDING_LABELS,
