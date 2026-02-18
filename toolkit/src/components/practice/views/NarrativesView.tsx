@@ -1,22 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { CardGrid, GridCard } from "@/components/ui/CardGrid";
-import { DetailPanel, DetailSection } from "@/components/ui/DetailPanel";
-import { StatusBadge } from "@/components/ui/Badge";
+import { CardList, ListCard } from "@/components/ui/CardGrid";
+import { DetailPanel, DetailSection, InlineRefCard } from "@/components/ui/DetailPanel";
 import { formatDate } from "@/lib/utils/formatting";
 import { GAP_LABELS, NARRATIVE_SOURCE_LABELS } from "@/lib/utils/constants";
 import type { Narrative, GapLevel } from "@/lib/supabase/types";
-
-function gapColor(gap: GapLevel): "red" | "orange" | "blue" | "green" {
-  const map: Record<GapLevel, "red" | "orange" | "blue" | "green"> = {
-    high: "red",
-    medium: "orange",
-    low: "blue",
-    aligned: "green",
-  };
-  return map[gap];
-}
 
 function gapBarColor(gap: GapLevel): string {
   const map: Record<GapLevel, string> = {
@@ -27,6 +16,18 @@ function gapBarColor(gap: GapLevel): string {
   };
   return map[gap];
 }
+
+function gapTextColor(gap: GapLevel): string {
+  const map: Record<GapLevel, string> = {
+    high: "text-status-red",
+    medium: "text-status-orange",
+    low: "text-status-blue",
+    aligned: "text-status-green",
+  };
+  return map[gap];
+}
+
+const labelStyle = "text-[11px] font-semibold text-dim uppercase tracking-[0.06em]";
 
 interface NarrativesViewProps {
   narratives: Narrative[];
@@ -39,62 +40,70 @@ export function NarrativesView({ narratives }: NarrativesViewProps) {
 
   return (
     <>
-      <CardGrid columns={2}>
+      <CardList>
         {narratives.map((narrative) => (
-          <GridCard
+          <ListCard
             key={narrative.id}
             onClick={() => setSelectedId(narrative.id)}
             selected={selectedId === narrative.id}
-            aspect="portrait"
             accentBar={gapBarColor(narrative.gap)}
           >
-            {/* Gap badge + source type */}
-            <div className="flex items-center gap-2 flex-wrap mb-3">
-              <StatusBadge
-                label={GAP_LABELS[narrative.gap] || narrative.gap}
-                color={gapColor(narrative.gap)}
-              />
-              <span className="text-[11px] text-dim uppercase tracking-wider">
-                {NARRATIVE_SOURCE_LABELS[narrative.source_type] || narrative.source_type}
-              </span>
+            {/* Row 1: Gap level + source type on left, date on right */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-[0.06em] ${gapTextColor(narrative.gap)}`}
+                >
+                  {GAP_LABELS[narrative.gap] || narrative.gap}
+                </span>
+                <span className="text-[11px] text-dim">&middot;</span>
+                <span className="text-[11px] text-dim uppercase tracking-[0.06em]">
+                  {NARRATIVE_SOURCE_LABELS[narrative.source_type] || narrative.source_type}
+                </span>
+              </div>
+              {narrative.date && (
+                <span className="text-[12px] text-dim shrink-0 ml-4">
+                  {formatDate(narrative.date)}
+                </span>
+              )}
             </div>
 
             {/* Source name */}
-            <h3 className="text-[15px] font-medium text-text leading-snug">
+            <h3 className="font-display text-[16px] font-semibold text-text leading-snug mb-3">
               {narrative.source_name}
             </h3>
 
-            {/* Date */}
-            {narrative.date && (
-              <p className="text-[12px] text-dim mt-1">
-                {formatDate(narrative.date)}
+            {/* SAYS */}
+            <div className="mb-2">
+              <p className="text-[11px] font-semibold text-dim tracking-[0.04em] mb-0.5">
+                SAYS
               </p>
-            )}
-
-            {/* The Narrative */}
-            <div className="mt-3">
-              <p className="text-[11px] text-dim uppercase tracking-wider mb-1">
-                The Narrative
-              </p>
-              <p className="text-[13px] text-text leading-relaxed line-clamp-3">
+              <p className="text-[13px] text-text italic leading-relaxed line-clamp-2">
                 {narrative.narrative_text}
               </p>
             </div>
 
-            {/* The Reality */}
+            {/* REALITY */}
             {narrative.reality_text && (
-              <div className="mt-3">
-                <p className="text-[11px] text-dim uppercase tracking-wider mb-1">
-                  The Reality
+              <div className="mb-2">
+                <p className="text-[11px] font-semibold text-dim tracking-[0.04em] mb-0.5">
+                  REALITY
                 </p>
-                <p className="text-[13px] text-muted leading-relaxed line-clamp-2">
+                <p className="text-[13px] text-text leading-relaxed line-clamp-2">
                   {narrative.reality_text}
                 </p>
               </div>
             )}
-          </GridCard>
+
+            {/* Evidence */}
+            {narrative.evidence_notes && (
+              <p className="text-[12px] text-accent">
+                Evidence: {narrative.evidence_notes}
+              </p>
+            )}
+          </ListCard>
         ))}
-      </CardGrid>
+      </CardList>
 
       {/* Detail Panel */}
       <DetailPanel
@@ -104,16 +113,17 @@ export function NarrativesView({ narratives }: NarrativesViewProps) {
         subtitle={
           selected && (
             <div className="flex items-center gap-2 flex-wrap">
-              <StatusBadge
-                label={GAP_LABELS[selected.gap] || selected.gap}
-                color={gapColor(selected.gap)}
-              />
-              <StatusBadge
-                label={NARRATIVE_SOURCE_LABELS[selected.source_type] || selected.source_type}
-                color="dim"
-              />
+              <span
+                className={`text-[11px] font-bold uppercase tracking-[0.06em] ${gapTextColor(selected.gap)}`}
+              >
+                {GAP_LABELS[selected.gap] || selected.gap}
+              </span>
+              <span className="text-[11px] text-dim">&middot;</span>
+              <span className="text-[11px] text-dim uppercase tracking-[0.06em]">
+                {NARRATIVE_SOURCE_LABELS[selected.source_type] || selected.source_type}
+              </span>
               {selected.date && (
-                <span className="text-[13px] text-muted">
+                <span className="text-[13px] text-muted ml-1">
                   {formatDate(selected.date)}
                 </span>
               )}
@@ -133,7 +143,7 @@ export function NarrativesView({ narratives }: NarrativesViewProps) {
 
             {/* The Reality */}
             <DetailSection title="The Reality">
-              <p className="text-[13px] text-muted leading-relaxed">
+              <p className="text-[13px] text-text leading-relaxed">
                 {selected.reality_text || "No reality analysis documented"}
               </p>
             </DetailSection>
@@ -150,9 +160,7 @@ export function NarrativesView({ narratives }: NarrativesViewProps) {
                 )}
                 {selected.source_url && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Source URL
-                    </p>
+                    <p className={`${labelStyle} mb-0.5`}>Source URL</p>
                     <a
                       href={selected.source_url}
                       target="_blank"
@@ -165,6 +173,17 @@ export function NarrativesView({ narratives }: NarrativesViewProps) {
                 )}
               </div>
             </DetailSection>
+
+            {/* Across the Toolkit */}
+            {selected.source_org_id && (
+              <DetailSection title="Across the Toolkit" subtitle="Connected data from other tools">
+                <InlineRefCard
+                  title={selected.source_name || "Source Organization"}
+                  subtitle="Organization"
+                  accentColor="orange"
+                />
+              </DetailSection>
+            )}
 
             {/* Record */}
             <DetailSection title="Record">

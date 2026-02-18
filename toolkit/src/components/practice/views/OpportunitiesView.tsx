@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { CardGrid, GridCard } from "@/components/ui/CardGrid";
-import { DetailPanel, DetailSection } from "@/components/ui/DetailPanel";
+import { CardList, ListCard } from "@/components/ui/CardGrid";
+import {
+  DetailPanel,
+  DetailSection,
+  InlineRefCard,
+} from "@/components/ui/DetailPanel";
 import { StatusBadge } from "@/components/ui/Badge";
 import { formatCurrency, formatDate, daysUntil } from "@/lib/utils/formatting";
 import {
@@ -10,6 +14,8 @@ import {
   OPPORTUNITY_TYPE_LABELS,
 } from "@/lib/utils/constants";
 import type { Opportunity } from "@/lib/supabase/types";
+
+/* ── Helpers ───────────────────────────────────────────── */
 
 function statusColor(status: string): "green" | "blue" | "orange" | "dim" {
   const map: Record<string, "green" | "blue" | "orange" | "dim"> = {
@@ -23,7 +29,7 @@ function statusColor(status: string): "green" | "blue" | "orange" | "dim" {
 
 function formatAmountRange(min: number | null, max: number | null): string | null {
   if (min !== null && max !== null) {
-    return `${formatCurrency(min)} – ${formatCurrency(max)}`;
+    return `${formatCurrency(min)} \u2013 ${formatCurrency(max)}`;
   }
   if (min !== null) return formatCurrency(min);
   if (max !== null) return `Up to ${formatCurrency(max)}`;
@@ -45,10 +51,46 @@ function DaysRemaining({ deadline }: { deadline: string | null }) {
   );
 }
 
+/** Short countdown for card row 2 — e.g. "Due Mar 15 (27d)" */
+function DeadlineCompact({ deadline }: { deadline: string | null }) {
+  if (!deadline) return null;
+  const days = daysUntil(deadline);
+  const dateStr = new Date(deadline).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+
+  let countdownColor = "text-muted";
+  if (days !== null && days <= 14) countdownColor = "text-status-red";
+  else if (days !== null && days <= 30) countdownColor = "text-status-orange";
+
+  const countdownText =
+    days === null
+      ? ""
+      : days <= 0
+        ? "(Past)"
+        : `(${days}d)`;
+
+  return (
+    <span className="font-mono text-[13px]">
+      <span className="text-muted">Due {dateStr}</span>{" "}
+      <span className={countdownColor}>{countdownText}</span>
+    </span>
+  );
+}
+
+/* ── Label style ───────────────────────────────────────── */
+
+const labelClass = "text-[11px] font-semibold text-dim uppercase tracking-[0.06em]";
+
+/* ── Props ─────────────────────────────────────────────── */
+
 interface OpportunitiesViewProps {
   opportunities: Opportunity[];
   investmentMap: Record<string, { id: string; initiative_name: string }>;
 }
+
+/* ── Main View ─────────────────────────────────────────── */
 
 export function OpportunitiesView({
   opportunities,
@@ -78,7 +120,7 @@ export function OpportunitiesView({
           <h2 className="font-display text-base font-semibold text-text mb-4">
             Closing Soon
           </h2>
-          <CardGrid columns={2}>
+          <CardList>
             {closingSoon.map((opp) => (
               <OpportunityCard
                 key={opp.id}
@@ -87,7 +129,7 @@ export function OpportunitiesView({
                 onClick={() => setSelectedId(opp.id)}
               />
             ))}
-          </CardGrid>
+          </CardList>
         </div>
       )}
 
@@ -97,7 +139,7 @@ export function OpportunitiesView({
           <h2 className="font-display text-base font-semibold text-text mb-4">
             Open
           </h2>
-          <CardGrid columns={2}>
+          <CardList>
             {open.map((opp) => (
               <OpportunityCard
                 key={opp.id}
@@ -106,7 +148,7 @@ export function OpportunitiesView({
                 onClick={() => setSelectedId(opp.id)}
               />
             ))}
-          </CardGrid>
+          </CardList>
         </div>
       )}
 
@@ -192,14 +234,12 @@ export function OpportunitiesView({
       >
         {selected && (
           <>
-            {/* Details */}
+            {/* Entity Details */}
             <DetailSection title="Details">
               <div className="space-y-3">
                 {selected.source_name && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Source
-                    </p>
+                    <p className={`${labelClass} mb-0.5`}>Source</p>
                     <p className="text-[13px] text-text">
                       {selected.source_name}
                     </p>
@@ -207,9 +247,7 @@ export function OpportunitiesView({
                 )}
                 {selected.deadline && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Deadline
-                    </p>
+                    <p className={`${labelClass} mb-0.5`}>Deadline</p>
                     <div className="flex items-center gap-2">
                       <p className="text-[13px] text-text">
                         {formatDate(selected.deadline)}
@@ -225,9 +263,7 @@ export function OpportunitiesView({
                 )}
                 {selected.description && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Description
-                    </p>
+                    <p className={`${labelClass} mb-0.5`}>Description</p>
                     <p className="text-[13px] text-text leading-relaxed">
                       {selected.description}
                     </p>
@@ -235,9 +271,7 @@ export function OpportunitiesView({
                 )}
                 {selected.eligibility && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Eligibility
-                    </p>
+                    <p className={`${labelClass} mb-0.5`}>Eligibility</p>
                     <p className="text-[13px] text-text leading-relaxed">
                       {selected.eligibility}
                     </p>
@@ -245,9 +279,7 @@ export function OpportunitiesView({
                 )}
                 {selected.amount_description && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Amount Description
-                    </p>
+                    <p className={`${labelClass} mb-0.5`}>Amount Description</p>
                     <p className="text-[13px] text-text leading-relaxed">
                       {selected.amount_description}
                     </p>
@@ -261,9 +293,7 @@ export function OpportunitiesView({
               <div className="space-y-3">
                 {selected.application_url && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Application URL
-                    </p>
+                    <p className={`${labelClass} mb-0.5`}>Application URL</p>
                     <a
                       href={selected.application_url}
                       target="_blank"
@@ -276,9 +306,7 @@ export function OpportunitiesView({
                 )}
                 {selected.contact_email && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Contact Email
-                    </p>
+                    <p className={`${labelClass} mb-0.5`}>Contact Email</p>
                     <a
                       href={`mailto:${selected.contact_email}`}
                       className="text-[13px] text-accent hover:underline"
@@ -301,9 +329,7 @@ export function OpportunitiesView({
                 <div className="space-y-3">
                   {selected.awarded_to && (
                     <div>
-                      <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                        Awarded To
-                      </p>
+                      <p className={`${labelClass} mb-0.5`}>Awarded To</p>
                       <p className="text-[13px] text-text">
                         {selected.awarded_to}
                       </p>
@@ -312,7 +338,7 @@ export function OpportunitiesView({
                   {selected.awarded_investment_id &&
                     investmentMap[selected.awarded_investment_id] && (
                       <div>
-                        <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
+                        <p className={`${labelClass} mb-0.5`}>
                           Linked Investment
                         </p>
                         <p className="text-[13px] text-accent">
@@ -322,6 +348,34 @@ export function OpportunitiesView({
                           }
                         </p>
                       </div>
+                    )}
+                </div>
+              </DetailSection>
+            )}
+
+            {/* Across the Toolkit */}
+            {(selected.source_name ||
+              (selected.awarded_investment_id &&
+                investmentMap[selected.awarded_investment_id])) && (
+              <DetailSection title="Across the Toolkit">
+                <div className="space-y-2">
+                  {selected.source_name && (
+                    <InlineRefCard
+                      title={selected.source_name}
+                      subtitle="Source organization"
+                      accentColor="green"
+                    />
+                  )}
+                  {selected.awarded_investment_id &&
+                    investmentMap[selected.awarded_investment_id] && (
+                      <InlineRefCard
+                        title={
+                          investmentMap[selected.awarded_investment_id]
+                            .initiative_name
+                        }
+                        subtitle="Linked investment"
+                        accentColor="gold"
+                      />
                     )}
                 </div>
               </DetailSection>
@@ -370,51 +424,54 @@ function OpportunityCard({
   );
 
   return (
-    <GridCard
-      onClick={onClick}
-      selected={selected}
-      aspect="portrait"
-    >
-      {/* Type badge */}
-      <div className="mb-3">
-        <span className="text-[11px] uppercase text-accent bg-accent-glow border border-border-accent px-2 py-0.5 rounded">
-          {OPPORTUNITY_TYPE_LABELS[opportunity.opportunity_type] ||
-            opportunity.opportunity_type}
-        </span>
+    <ListCard onClick={onClick} selected={selected}>
+      {/* Row 1: Type + Status badges (left) | Amount (right) */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] uppercase text-accent bg-accent-glow border border-border-accent px-2 py-0.5 rounded">
+            {OPPORTUNITY_TYPE_LABELS[opportunity.opportunity_type] ||
+              opportunity.opportunity_type}
+          </span>
+          <StatusBadge
+            label={
+              OPPORTUNITY_STATUS_LABELS[opportunity.status] ||
+              opportunity.status
+            }
+            color={statusColor(opportunity.status)}
+          />
+        </div>
+        {amount && (
+          <span className="font-mono text-[16px] font-semibold text-text shrink-0">
+            {amount}
+          </span>
+        )}
       </div>
 
-      {/* Title */}
-      <h3 className="text-[15px] font-medium text-text leading-snug">
-        {opportunity.title}
-      </h3>
-
-      {/* Source */}
-      {opportunity.source_name && (
-        <p className="text-[12px] text-muted mt-1">
-          {opportunity.source_name}
-        </p>
-      )}
-
-      {/* Amount range */}
-      {amount && (
-        <p className="font-mono text-[14px] font-medium text-accent mt-2">
-          {amount}
-        </p>
-      )}
-
-      {/* Days remaining */}
+      {/* Row 2: Deadline + countdown (right-aligned) */}
       {opportunity.deadline && (
-        <div className="mt-2">
-          <DaysRemaining deadline={opportunity.deadline} />
+        <div className="flex justify-end mt-1">
+          <DeadlineCompact deadline={opportunity.deadline} />
         </div>
       )}
 
-      {/* Description preview */}
+      {/* Title */}
+      <h3 className="font-display text-[16px] font-semibold text-text leading-snug mt-2">
+        {opportunity.title}
+      </h3>
+
+      {/* Description preview — 2-line max */}
       {opportunity.description && (
-        <p className="text-[12px] text-muted mt-3 leading-relaxed line-clamp-2">
+        <p className="text-[13px] text-muted mt-1.5 leading-relaxed line-clamp-2">
           {opportunity.description}
         </p>
       )}
-    </GridCard>
+
+      {/* Eligibility — always visible */}
+      {opportunity.eligibility && (
+        <p className="text-[12px] text-dim mt-2">
+          Eligibility: {opportunity.eligibility}
+        </p>
+      )}
+    </ListCard>
   );
 }

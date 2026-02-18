@@ -1,68 +1,61 @@
 "use client";
 
-interface CardGridProps {
+/* ── CardList: single-column, tight stacking ──────── */
+
+interface CardListProps {
   children: React.ReactNode;
-  columns?: 2 | 3;
+  className?: string;
 }
 
-export function CardGrid({ children, columns = 2 }: CardGridProps) {
+export function CardList({ children, className = "" }: CardListProps) {
   return (
-    <div
-      className={`grid grid-cols-1 gap-4 ${
-        columns === 3
-          ? "sm:grid-cols-2 xl:grid-cols-3"
-          : "sm:grid-cols-2"
-      }`}
-    >
+    <div className={`flex flex-col gap-1.5 ${className}`}>
       {children}
     </div>
   );
 }
 
-interface GridCardProps {
+/* ── ListCard: content-hugging card ───────────────── */
+
+interface ListCardProps {
   children: React.ReactNode;
   onClick?: () => void;
   selected?: boolean;
-  aspect?: "portrait" | "square";
   className?: string;
   accentBar?: string;
 }
 
-export function GridCard({
+export function ListCard({
   children,
   onClick,
   selected = false,
-  aspect = "portrait",
   className = "",
   accentBar,
-}: GridCardProps) {
+}: ListCardProps) {
   return (
     <div
       onClick={onClick}
-      className={`relative bg-surface-card border rounded-card overflow-hidden transition-all duration-card flex ${
-        aspect === "portrait" ? "aspect-[4/5]" : "aspect-square"
-      } ${
+      className={`bg-surface-card border rounded-card transition-all duration-card ${
         onClick
-          ? "cursor-pointer hover:border-border-medium hover:shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
+          ? "cursor-pointer hover:border-border-medium"
           : ""
       } ${
         selected
           ? "ring-1 ring-accent border-accent"
           : "border-border"
-      } ${className}`}
+      } ${accentBar ? "flex" : ""} ${className}`}
     >
-      {/* Optional accent bar on left edge */}
       {accentBar && (
-        <div className={`w-1.5 shrink-0 ${accentBar}`} />
+        <div className={`w-1 shrink-0 rounded-l-card ${accentBar}`} />
       )}
-
-      <div className="relative flex-1 min-w-0 overflow-hidden">
-        <div className="absolute inset-0 p-5 flex flex-col overflow-hidden">
-          {children}
-        </div>
-        {/* Bottom fade so content doesn't abruptly cut off */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-surface-card to-transparent pointer-events-none" />
+      <div className="flex-1 min-w-0 px-5 py-4">
+        {children}
       </div>
     </div>
   );
 }
+
+/* ── Backward-compat re-exports ──────────────────── */
+
+export { CardList as CardGrid };
+export { ListCard as GridCard };

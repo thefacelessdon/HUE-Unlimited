@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CardGrid, GridCard } from "@/components/ui/CardGrid";
+import { CardList, ListCard } from "@/components/ui/CardGrid";
 import { DetailPanel, DetailSection } from "@/components/ui/DetailPanel";
 import { formatDate } from "@/lib/utils/formatting";
 import type { Precedent } from "@/lib/supabase/types";
@@ -10,6 +10,9 @@ interface PrecedentsViewProps {
   precedents: Precedent[];
 }
 
+const labelClass =
+  "text-[11px] font-semibold text-dim uppercase tracking-[0.06em]";
+
 export function PrecedentsView({ precedents }: PrecedentsViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const precedentMap = new Map(precedents.map((p) => [p.id, p]));
@@ -17,45 +20,48 @@ export function PrecedentsView({ precedents }: PrecedentsViewProps) {
 
   return (
     <>
-      <CardGrid columns={2}>
+      <CardList>
         {precedents.map((p) => (
-          <GridCard
+          <ListCard
             key={p.id}
             onClick={() => setSelectedId(p.id)}
             selected={selectedId === p.id}
-            aspect="portrait"
           >
-            {/* Name */}
-            <h3 className="text-[15px] font-medium text-text leading-snug">
-              {p.name}
-            </h3>
+            {/* Row 1: Title + Period */}
+            <div className="flex items-baseline justify-between gap-4">
+              <h3 className="font-display text-[16px] font-semibold text-text">
+                {p.name}
+              </h3>
+              {p.period && (
+                <span className="font-mono text-[13px] text-dim shrink-0">
+                  {p.period}
+                </span>
+              )}
+            </div>
 
-            {/* Period */}
-            {p.period && (
-              <p className="text-[12px] text-dim mt-1">{p.period}</p>
-            )}
-
-            {/* Takeaway inset box */}
-            {p.takeaway && (
-              <div className="bg-surface-inset border-l-2 border-accent rounded-md px-4 py-3 mt-3">
-                <p className="text-[11px] text-dim uppercase tracking-wider mb-1">
-                  Takeaway
-                </p>
-                <p className="text-[13px] text-text leading-relaxed line-clamp-4">
-                  {p.takeaway}
-                </p>
-              </div>
-            )}
-
-            {/* Connected to */}
-            {p.connects_to && (
-              <p className="text-[12px] text-dim mt-auto pt-3">
-                Connected to: {p.connects_to}
+            {/* Involved */}
+            {p.involved && (
+              <p className="text-[13px] text-muted mt-1 truncate">
+                {p.involved}
               </p>
             )}
-          </GridCard>
+
+            {/* Takeaway — pull quote */}
+            {p.takeaway && (
+              <p className="text-[14px] text-text italic border-l-2 border-accent pl-3 mt-3">
+                &ldquo;{p.takeaway}&rdquo;
+              </p>
+            )}
+
+            {/* Connects to */}
+            {p.connects_to && (
+              <p className="text-[12px] text-accent mt-3">
+                Connects to: {p.connects_to}
+              </p>
+            )}
+          </ListCard>
         ))}
-      </CardGrid>
+      </CardList>
 
       {/* Detail Panel */}
       <DetailPanel
@@ -66,33 +72,29 @@ export function PrecedentsView({ precedents }: PrecedentsViewProps) {
       >
         {selected && (
           <>
-            {/* Overview */}
+            {/* 1. Overview */}
             <DetailSection title="Overview">
               <div className="space-y-3">
                 {selected.period && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Period
+                    <p className={labelClass}>Period</p>
+                    <p className="text-[13px] text-text mt-0.5">
+                      {selected.period}
                     </p>
-                    <p className="text-[13px] text-text">{selected.period}</p>
                   </div>
                 )}
                 {selected.involved && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Involved Parties
-                    </p>
-                    <p className="text-[13px] text-text leading-relaxed">
+                    <p className={labelClass}>Involved Parties</p>
+                    <p className="text-[13px] text-text leading-relaxed mt-0.5">
                       {selected.involved}
                     </p>
                   </div>
                 )}
                 {selected.description && (
                   <div>
-                    <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                      Description
-                    </p>
-                    <p className="text-[13px] text-text leading-relaxed">
+                    <p className={labelClass}>Description</p>
+                    <p className="text-[13px] text-text leading-relaxed mt-0.5">
                       {selected.description}
                     </p>
                   </div>
@@ -100,35 +102,32 @@ export function PrecedentsView({ precedents }: PrecedentsViewProps) {
               </div>
             </DetailSection>
 
-            {/* What Produced */}
-            {selected.what_produced && (
-              <DetailSection title="What Produced">
-                <p className="text-[13px] text-text leading-relaxed">
-                  {selected.what_produced}
-                </p>
-              </DetailSection>
-            )}
-
-            {/* Lessons */}
-            {(selected.what_worked || selected.what_didnt) && (
+            {/* 2. Lessons */}
+            {(selected.what_produced ||
+              selected.what_worked ||
+              selected.what_didnt) && (
               <DetailSection title="Lessons">
                 <div className="space-y-3">
-                  {selected.what_worked && (
-                    <div className="bg-surface-inset border-l-2 border-status-green rounded-md px-4 py-3">
-                      <p className="text-[11px] text-dim uppercase tracking-wider mb-1">
-                        What worked
+                  {selected.what_produced && (
+                    <div>
+                      <p className={labelClass}>What Produced</p>
+                      <p className="text-[13px] text-text leading-relaxed mt-0.5">
+                        {selected.what_produced}
                       </p>
-                      <p className="text-[13px] text-text leading-relaxed">
+                    </div>
+                  )}
+                  {selected.what_worked && (
+                    <div className="border-l-2 border-status-green pl-3">
+                      <p className={labelClass}>What Worked</p>
+                      <p className="text-[13px] text-text leading-relaxed mt-0.5">
                         {selected.what_worked}
                       </p>
                     </div>
                   )}
                   {selected.what_didnt && (
-                    <div className="bg-surface-inset border-l-2 border-status-red rounded-md px-4 py-3">
-                      <p className="text-[11px] text-dim uppercase tracking-wider mb-1">
-                        What didn&apos;t work
-                      </p>
-                      <p className="text-[13px] text-text leading-relaxed">
+                    <div className="border-l-2 border-status-red pl-3">
+                      <p className={labelClass}>What Didn&apos;t Work</p>
+                      <p className="text-[13px] text-text leading-relaxed mt-0.5">
                         {selected.what_didnt}
                       </p>
                     </div>
@@ -137,28 +136,26 @@ export function PrecedentsView({ precedents }: PrecedentsViewProps) {
               </DetailSection>
             )}
 
-            {/* Takeaway */}
+            {/* 3. Takeaway — pull quote */}
             {selected.takeaway && (
               <DetailSection title="Takeaway">
-                <div className="bg-surface-inset border-l-2 border-accent rounded-md px-4 py-3">
-                  <p className="text-[13px] text-text leading-relaxed">
-                    {selected.takeaway}
-                  </p>
-                </div>
+                <p className="text-[14px] text-text italic border-l-2 border-accent pl-3">
+                  &ldquo;{selected.takeaway}&rdquo;
+                </p>
               </DetailSection>
             )}
 
-            {/* Connects to */}
+            {/* 4. Connects to */}
             {selected.connects_to && (
-              <div className="mt-6">
-                <p className="text-[11px] text-dim uppercase tracking-wider mb-0.5">
-                  Connects to
+              <div className="mt-8">
+                <p className={labelClass}>Connects to</p>
+                <p className="text-[13px] text-accent mt-0.5">
+                  {selected.connects_to}
                 </p>
-                <p className="text-[13px] text-text">{selected.connects_to}</p>
               </div>
             )}
 
-            {/* Record */}
+            {/* 5. Record */}
             <DetailSection title="Record">
               <div className="space-y-1 text-[12px] text-dim">
                 <p>Created: {formatDate(selected.created_at)}</p>

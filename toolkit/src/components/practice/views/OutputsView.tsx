@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CardGrid, GridCard } from "@/components/ui/CardGrid";
+import { CardList, ListCard } from "@/components/ui/CardGrid";
 import {
   DetailPanel,
   DetailSection,
@@ -80,10 +80,9 @@ export function OutputsView({
               No published outputs yet.
             </p>
           ) : (
-            <CardGrid columns={2}>
+            <CardList>
               {published.map((o) => {
-                const typeLabel =
-                  OUTPUT_TYPE_LABELS[o.output_type] ?? o.output_type;
+                const typeLabel = OUTPUT_TYPE_LABELS[o.output_type] ?? o.output_type;
                 const decision = o.triggered_by_decision_id
                   ? decisionMap[o.triggered_by_decision_id]
                   : null;
@@ -92,52 +91,53 @@ export function OutputsView({
                   : null;
 
                 return (
-                  <GridCard
+                  <ListCard
                     key={o.id}
                     onClick={() => setSelectedId(o.id)}
                     selected={selectedId === o.id}
-                    aspect="portrait"
                   >
-                    {/* Badges */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <StatusBadge label={typeLabel} color="purple" />
-                      <StatusBadge label="Published" color="green" />
+                    {/* Row 1: Type badge + published left, date right */}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[11px] font-bold uppercase tracking-[0.06em] text-status-purple">
+                          {typeLabel}
+                        </span>
+                        <StatusBadge label="Published" color="green" />
+                      </div>
+                      <span className="text-[13px] text-dim font-mono shrink-0">
+                        {formatDate(o.published_at)}
+                      </span>
                     </div>
 
-                    {/* Published date */}
-                    <p className="text-[12px] text-dim mt-2">
-                      {formatDate(o.published_at)}
-                    </p>
-
                     {/* Title */}
-                    <h3 className="text-[15px] font-medium text-text leading-snug mt-1.5">
+                    <h3 className="font-display text-[16px] font-semibold text-text leading-snug mt-2">
                       {o.title}
                     </h3>
 
                     {/* Summary */}
                     {o.summary && (
-                      <p className="text-[13px] text-muted leading-relaxed line-clamp-3 mt-2">
+                      <p className="text-[13px] text-muted leading-relaxed line-clamp-2 mt-1.5">
                         {o.summary}
                       </p>
                     )}
 
-                    {/* Triggered by */}
-                    {decision && (
-                      <p className="text-[12px] text-dim mt-auto pt-2">
-                        Triggered by: {decision.decision_title}
-                      </p>
-                    )}
-
-                    {/* Delivered to */}
-                    {stakeholder && (
-                      <p className="text-[12px] text-dim mt-1">
-                        Delivered to: {stakeholder.name}
-                      </p>
-                    )}
-                  </GridCard>
+                    {/* Triggered by + Delivered to */}
+                    <div className="mt-2 space-y-0.5">
+                      {decision && (
+                        <p className="text-[12px] text-accent">
+                          Triggered by: {decision.decision_title}
+                        </p>
+                      )}
+                      {stakeholder && (
+                        <p className="text-[12px] text-dim">
+                          Delivered to: {stakeholder.name}
+                        </p>
+                      )}
+                    </div>
+                  </ListCard>
                 );
               })}
-            </CardGrid>
+            </CardList>
           )}
         </>
       )}
@@ -148,33 +148,32 @@ export function OutputsView({
           {drafts.length === 0 ? (
             <p className="text-[13px] text-muted">No drafts.</p>
           ) : (
-            <div className="space-y-2">
+            <CardList>
               {drafts.map((o) => {
-                const typeLabel =
-                  OUTPUT_TYPE_LABELS[o.output_type] ?? o.output_type;
+                const typeLabel = OUTPUT_TYPE_LABELS[o.output_type] ?? o.output_type;
 
                 return (
-                  <div
+                  <ListCard
                     key={o.id}
                     onClick={() => setSelectedId(o.id)}
-                    className={`flex items-center gap-3 px-4 py-3 bg-surface-card border rounded-md cursor-pointer transition-all hover:border-border-medium hover:shadow-[0_2px_8px_rgba(0,0,0,0.15)] ${
-                      selectedId === o.id
-                        ? "ring-1 ring-accent border-accent"
-                        : "border-border"
-                    }`}
+                    selected={selectedId === o.id}
                   >
-                    <StatusBadge label={typeLabel} color="purple" />
-                    <StatusBadge label="Draft" color="dim" />
-                    <span className="text-[14px] font-medium text-text truncate flex-1 min-w-0">
-                      {o.title}
-                    </span>
-                    <span className="text-[12px] text-dim shrink-0">
-                      {formatDate(o.created_at)}
-                    </span>
-                  </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] font-bold uppercase tracking-[0.06em] text-status-purple shrink-0">
+                        {typeLabel}
+                      </span>
+                      <StatusBadge label="Draft" color="dim" />
+                      <span className="text-[14px] font-display font-semibold text-text truncate flex-1 min-w-0">
+                        {o.title}
+                      </span>
+                      <span className="text-[12px] text-dim font-mono shrink-0">
+                        {formatDate(o.created_at)}
+                      </span>
+                    </div>
+                  </ListCard>
                 );
               })}
-            </div>
+            </CardList>
           )}
         </>
       )}
@@ -188,18 +187,14 @@ export function OutputsView({
         subtitle={
           selected ? (
             <div className="flex items-center gap-2 flex-wrap mt-1">
-              <StatusBadge
-                label={
-                  OUTPUT_TYPE_LABELS[selected.output_type] ??
-                  selected.output_type
-                }
-                color="purple"
-              />
+              <span className="text-[11px] font-bold uppercase tracking-[0.06em] text-status-purple">
+                {OUTPUT_TYPE_LABELS[selected.output_type] ?? selected.output_type}
+              </span>
               <StatusBadge
                 label={selected.is_published ? "Published" : "Draft"}
                 color={selected.is_published ? "green" : "dim"}
               />
-              <span className="text-[12px] text-dim">
+              <span className="text-[12px] text-dim font-mono">
                 {selected.is_published
                   ? formatDate(selected.published_at)
                   : formatDate(selected.created_at)}
@@ -219,7 +214,7 @@ export function OutputsView({
               </DetailSection>
             )}
 
-            {/* Content */}
+            {/* Content — rendered as formatted prose */}
             {selected.content && (
               <DetailSection title="Content">
                 <div className="text-[13px] text-text leading-loose whitespace-pre-wrap">
@@ -228,34 +223,32 @@ export function OutputsView({
               </DetailSection>
             )}
 
-            {/* Triggered by */}
-            {selected.triggered_by_decision_id &&
-              decisionMap[selected.triggered_by_decision_id] && (
-                <DetailSection title="Triggered by">
-                  <InlineRefCard
-                    title={
-                      decisionMap[selected.triggered_by_decision_id]
-                        .decision_title
-                    }
-                    subtitle="Decision"
-                    accentColor="orange"
-                  />
-                </DetailSection>
-              )}
+            {/* Section 2: Across the Toolkit */}
+            <DetailSection title="Across the Toolkit" subtitle="Connected data from other tools">
+              <div className="space-y-2">
+                {selected.triggered_by_decision_id &&
+                  decisionMap[selected.triggered_by_decision_id] && (
+                    <InlineRefCard
+                      title={decisionMap[selected.triggered_by_decision_id].decision_title}
+                      subtitle="Triggering decision"
+                      accentColor="blue"
+                    />
+                  )}
+                {selected.target_stakeholder_id &&
+                  orgMap[selected.target_stakeholder_id] && (
+                    <InlineRefCard
+                      title={orgMap[selected.target_stakeholder_id].name}
+                      subtitle="Delivered to"
+                      accentColor="green"
+                    />
+                  )}
+                {!selected.triggered_by_decision_id && !selected.target_stakeholder_id && (
+                  <p className="text-[13px] text-dim">No cross-tool connections found.</p>
+                )}
+              </div>
+            </DetailSection>
 
-            {/* Delivered to */}
-            {selected.target_stakeholder_id &&
-              orgMap[selected.target_stakeholder_id] && (
-                <DetailSection title="Delivered to">
-                  <InlineRefCard
-                    title={orgMap[selected.target_stakeholder_id].name}
-                    subtitle="Organization"
-                    accentColor="blue"
-                  />
-                </DetailSection>
-              )}
-
-            {/* Record */}
+            {/* Section 3: Record */}
             <DetailSection title="Record">
               <div className="space-y-1 text-[12px] text-dim">
                 <p>Created: {formatDate(selected.created_at)}</p>
