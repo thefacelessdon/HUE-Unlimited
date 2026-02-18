@@ -45,12 +45,12 @@ export function DetailPanel({
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/40 animate-overlay-in"
+        className="absolute inset-0 bg-black/50 animate-overlay-in"
         onClick={onClose}
       />
 
-      {/* Panel */}
-      <div className="relative w-[55%] min-w-[500px] max-w-[800px] h-full bg-surface-card border-l border-border animate-slide-in-right flex flex-col">
+      {/* Panel — full width on mobile, 50vw on desktop */}
+      <div className="relative w-full sm:w-[50vw] sm:min-w-[480px] max-w-[720px] h-full bg-surface border-l border-border animate-slide-in-right flex flex-col">
         {/* Header */}
         <div className="shrink-0 px-6 py-4 border-b border-border">
           <div className="flex items-center justify-between mb-3">
@@ -84,7 +84,7 @@ export function DetailPanel({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">{children}</div>
+        <div className="flex-1 overflow-y-auto px-8 py-8">{children}</div>
       </div>
     </div>
   );
