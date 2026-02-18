@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CardList, ListCard } from "@/components/ui/CardGrid";
 import { DetailPanel, DetailSection, InlineRefCard } from "@/components/ui/DetailPanel";
 import { StatusBadge } from "@/components/ui/Badge";
@@ -27,6 +28,18 @@ export function EcosystemMapView({
 }: EcosystemMapViewProps) {
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [selectedPractitioner, setSelectedPractitioner] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const openId = searchParams.get("open");
+    if (!openId) return;
+    // Try org first, fall back to practitioner
+    if (organizations.some((o) => o.id === openId)) {
+      setSelectedOrg(openId);
+    } else if (practitioners.some((p) => p.id === openId)) {
+      setSelectedPractitioner(openId);
+    }
+  }, [searchParams, organizations, practitioners]);
 
   const org = selectedOrg ? organizations.find((o) => o.id === selectedOrg) : null;
   const practitioner = selectedPractitioner

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CardList, ListCard } from "@/components/ui/CardGrid";
 import { DetailPanel, DetailSection, InlineRefCard } from "@/components/ui/DetailPanel";
 import { StatusBadge } from "@/components/ui/Badge";
@@ -29,6 +30,13 @@ interface InvestmentsViewProps {
 
 export function InvestmentsView({ investments }: InvestmentsViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const openId = searchParams.get("open");
+    if (openId) setSelectedId(openId);
+  }, [searchParams]);
+
   const investmentMap = new Map(investments.map((i) => [i.id, i]));
   const selected = selectedId ? investmentMap.get(selectedId) : null;
 
