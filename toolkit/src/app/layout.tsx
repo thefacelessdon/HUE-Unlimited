@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import "@fontsource/dm-serif-display/400.css";
+import "@fontsource/dm-sans/400.css";
+import "@fontsource/dm-sans/500.css";
+import "@fontsource/dm-sans/600.css";
+import "@fontsource/dm-sans/700.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
 import "./globals.css";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
 
 export const metadata: Metadata = {
   title: "Cultural Architecture Toolkit",
@@ -27,7 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-surface text-text`}
+        className="antialiased bg-surface text-text"
+        style={{
+          ["--font-display" as string]: "'DM Serif Display', serif",
+          ["--font-body" as string]: "'DM Sans', sans-serif",
+          ["--font-mono" as string]: "'JetBrains Mono', monospace",
+        }}
       >
         {children}
       </body>

@@ -7,9 +7,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants = {
   primary:
-    "bg-accent text-surface hover:bg-accent-dim font-medium",
+    "bg-accent text-surface hover:bg-accent-warm font-medium",
   secondary:
-    "bg-card border border-border text-text hover:border-dim",
+    "bg-surface-card border border-border text-text hover:border-border-medium",
   ghost: "text-muted hover:text-text",
 };
 
@@ -26,7 +26,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center transition-colors disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center transition-colors duration-card disabled:opacity-50 font-body ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     />
   );
