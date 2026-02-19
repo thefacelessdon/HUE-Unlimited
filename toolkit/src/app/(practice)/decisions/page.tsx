@@ -139,7 +139,6 @@ export default async function DecisionsPage() {
           investmentsByOrg={investmentsByOrg}
           narrativesByOrg={narrativesByOrg}
           precedents={precedents}
-          orgNameMap={Object.fromEntries(orgNameMap)}
         />
       )}
     </div>

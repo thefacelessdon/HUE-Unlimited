@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { CardList, ListCard } from "@/components/ui/CardGrid";
 import { DetailPanel, DetailSection, InlineRefCard } from "@/components/ui/DetailPanel";
 import { StatusBadge } from "@/components/ui/Badge";
@@ -21,6 +21,7 @@ function statusColor(status: string): "green" | "red" | "blue" | "orange" | "dim
 }
 
 function countdownColor(days: number): string {
+  if (days <= 14) return "text-status-red font-bold";
   if (days <= 30) return "text-status-red";
   if (days <= 90) return "text-status-orange";
   return "text-muted";
@@ -194,7 +195,6 @@ interface DecisionsViewProps {
   investmentsByOrg: Record<string, InvSummary[]>;
   narrativesByOrg: Record<string, NarrSummary[]>;
   precedents: PrecSummary[];
-  orgNameMap: Record<string, string>;
 }
 
 function formatAmount(amount: number | null): string {
@@ -218,19 +218,182 @@ const GAP_COLORS: Record<string, string> = {
   aligned: "text-status-green",
 };
 
+/* ── Decision Timeline View ──────────────────────────── */
+
+function DecisionTimeline({
+  decisions,
+  onSelect,
+  selectedId,
+}: {
+  decisions: Decision[];
+  onSelect: (id: string) => void;
+  selectedId: string | null;
+}) {
+  // Only show active decisions with dates
+  const timelineDecisions = decisions.filter(
+    (d) =>
+      (d.status === "upcoming" || d.status === "deliberating") &&
+      d.locks_date
+  );
+
+  if (timelineDecisions.length === 0) {
+    return <p className="text-[13px] text-dim">No active decisions with lock dates to display.</p>;
+  }
+
+  // Calculate timeline range: 2 weeks before today to 2 weeks after latest lock
+  const now = new Date();
+  const timelineStart = new Date(now);
+  timelineStart.setDate(timelineStart.getDate() - 14);
+
+  const latestLock = Math.max(
+    ...timelineDecisions.map((d) => new Date(d.locks_date!).getTime())
+  );
+  const timelineEnd = new Date(latestLock);
+  timelineEnd.setDate(timelineEnd.getDate() + 14);
+
+  const totalMs = timelineEnd.getTime() - timelineStart.getTime();
+  const todayPercent = ((now.getTime() - timelineStart.getTime()) / totalMs) * 100;
+
+  function getPercent(dateStr: string): number {
+    const t = new Date(dateStr).getTime();
+    return Math.max(0, Math.min(100, ((t - timelineStart.getTime()) / totalMs) * 100));
+  }
+
+  // Generate month labels
+  const months: { label: string; percent: number }[] = [];
+  const cursor = new Date(timelineStart.getFullYear(), timelineStart.getMonth() + 1, 1);
+  while (cursor.getTime() < timelineEnd.getTime()) {
+    months.push({
+      label: cursor.toLocaleDateString("en-US", { month: "short" }),
+      percent: ((cursor.getTime() - timelineStart.getTime()) / totalMs) * 100,
+    });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  // Sort by deliberation start or locks_date
+  const sorted = [...timelineDecisions].sort((a, b) => {
+    const aStart = a.deliberation_start || a.locks_date || "";
+    const bStart = b.deliberation_start || b.locks_date || "";
+    return aStart.localeCompare(bStart);
+  });
+
+  return (
+    <div className="bg-surface-card border border-border rounded-card p-6 overflow-x-auto">
+      {/* Month labels */}
+      <div className="relative h-6 ml-[200px]">
+        {months.map((m) => (
+          <span
+            key={m.label}
+            className="absolute font-mono text-[11px] text-dim border-l border-border-medium pl-1"
+            style={{ left: `${m.percent}%`, top: 0 }}
+          >
+            {m.label}
+          </span>
+        ))}
+      </div>
+
+      {/* Today line + rows */}
+      <div className="relative">
+        {/* Today line spanning all rows */}
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-accent z-10"
+          style={{ left: `calc(200px + ${todayPercent}%)` }}
+        />
+        <div
+          className="absolute -top-5 font-mono text-[10px] font-semibold text-accent z-10"
+          style={{ left: `calc(200px + ${todayPercent}%)`, transform: "translateX(-50%)" }}
+        >
+          Today
+        </div>
+
+        {/* Decision rows */}
+        {sorted.map((d) => {
+          const barStart = d.deliberation_start
+            ? getPercent(d.deliberation_start)
+            : Math.max(0, getPercent(d.locks_date!) - 10);
+          const delibEnd = d.deliberation_end
+            ? getPercent(d.deliberation_end)
+            : getPercent(d.locks_date!);
+          const barEnd = getPercent(d.locks_date!);
+          const days = daysUntil(d.locks_date);
+
+          return (
+            <div
+              key={d.id}
+              className={`flex items-center h-12 cursor-pointer transition-colors rounded ${
+                selectedId === d.id ? "bg-surface-inset" : "hover:bg-surface-inset/50"
+              }`}
+              onClick={() => onSelect(d.id)}
+            >
+              {/* Label */}
+              <div className="w-[200px] shrink-0 pr-4">
+                <p className="font-display text-[13px] font-semibold text-text truncate leading-tight">
+                  {d.decision_title}
+                </p>
+                <p className="text-[11px] text-dim truncate">
+                  {d.stakeholder_name || "—"}
+                </p>
+              </div>
+
+              {/* Track */}
+              <div className="flex-1 relative h-6">
+                {/* Deliberation bar (green) */}
+                <div
+                  className="absolute h-full bg-status-green/50 rounded-l"
+                  style={{ left: `${barStart}%`, width: `${Math.max(0, delibEnd - barStart)}%` }}
+                />
+                {/* Lock window bar (orange) */}
+                {barEnd > delibEnd && (
+                  <div
+                    className="absolute h-full bg-status-orange/40 rounded-r"
+                    style={{ left: `${delibEnd}%`, width: `${barEnd - delibEnd}%` }}
+                  />
+                )}
+                {/* Status dot at bar start */}
+                <div
+                  className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${
+                    d.status === "deliberating" ? "bg-status-orange" : "bg-status-blue"
+                  }`}
+                  style={{ left: `${barStart}%`, transform: "translateX(-50%) translateY(-50%)" }}
+                />
+                {/* Lock date label at bar end */}
+                <span
+                  className={`absolute top-1/2 -translate-y-1/2 text-[10px] font-mono ml-1 ${
+                    days !== null ? countdownColor(days) : "text-dim"
+                  }`}
+                  style={{ left: `${barEnd}%` }}
+                >
+                  Locks {formatShortDate(d.locks_date)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Component ─────────────────────────────────── */
 
 export function DecisionsView({
   decisions, outputsByDecision, dependsOn, dependedOnBy,
-  investmentsByOrg, narrativesByOrg, precedents, orgNameMap,
+  investmentsByOrg, narrativesByOrg, precedents,
 }: DecisionsViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [view, setView] = useState<"list" | "timeline">("list");
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const openId = searchParams.get("open");
     if (openId) setSelectedId(openId);
   }, [searchParams]);
+
+  const navigateTo = useCallback((path: string) => {
+    router.push(path);
+  }, [router]);
+
   const decisionMap = new Map(decisions.map((d) => [d.id, d]));
   const selected = selectedId ? decisionMap.get(selectedId) : null;
 
@@ -255,8 +418,41 @@ export function DecisionsView({
 
   return (
     <>
-      {/* Active decisions grouped by temporal proximity */}
-      {TIME_GROUP_ORDER.map((groupName) => {
+      {/* View toggle */}
+      <div className="flex items-center gap-1 mb-6">
+        <button
+          onClick={() => setView("list")}
+          className={`px-3 py-1.5 text-[13px] font-medium rounded-md transition-colors ${
+            view === "list"
+              ? "bg-surface-inset text-text"
+              : "text-muted hover:text-text"
+          }`}
+        >
+          List
+        </button>
+        <button
+          onClick={() => setView("timeline")}
+          className={`px-3 py-1.5 text-[13px] font-medium rounded-md transition-colors ${
+            view === "timeline"
+              ? "bg-surface-inset text-text"
+              : "text-muted hover:text-text"
+          }`}
+        >
+          Timeline
+        </button>
+      </div>
+
+      {/* Timeline view */}
+      {view === "timeline" && (
+        <DecisionTimeline
+          decisions={decisions}
+          onSelect={setSelectedId}
+          selectedId={selectedId}
+        />
+      )}
+
+      {/* List view — Active decisions grouped by temporal proximity */}
+      {view === "list" && TIME_GROUP_ORDER.map((groupName) => {
         const group = groupedActive[groupName];
         if (group.length === 0) return null;
 
@@ -309,9 +505,17 @@ export function DecisionsView({
                       {d.decision_title}
                     </h3>
 
-                    {/* Stakeholder org */}
+                    {/* Stakeholder org — clickable to ecosystem map */}
                     {d.stakeholder_name && (
-                      <p className="text-[13px] text-muted mt-0.5">{d.stakeholder_name}</p>
+                      <p
+                        className="text-[13px] text-muted mt-0.5 cursor-pointer hover:text-accent transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (d.stakeholder_org_id) navigateTo(`/ecosystem-map?open=${d.stakeholder_org_id}`);
+                        }}
+                      >
+                        {d.stakeholder_name}
+                      </p>
                     )}
 
                     {/* Intervention note */}
@@ -321,11 +525,15 @@ export function DecisionsView({
                       </p>
                     )}
 
-                    {/* Output link */}
+                    {/* Output link — clickable to outputs page */}
                     {outputs && outputs.length > 0 && (
                       <div className="mt-2 space-y-0.5">
                         {outputs.map((output) => (
-                          <p key={output.id} className="text-[12px] text-accent">
+                          <p
+                            key={output.id}
+                            className="text-[12px] text-accent cursor-pointer hover:underline"
+                            onClick={(e) => { e.stopPropagation(); navigateTo(`/outputs?open=${output.id}`); }}
+                          >
                             &#9656; Output: {output.title}
                             {output.is_published ? " [Published]" : " [Draft]"}
                           </p>
@@ -367,8 +575,8 @@ export function DecisionsView({
         );
       })}
 
-      {/* Completed / Locked decisions — compact list */}
-      {closedDecisions.length > 0 && (
+      {/* Completed / Locked decisions — list view only */}
+      {view === "list" && closedDecisions.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border">
             <h3 className="font-display text-base font-semibold text-text">
@@ -629,19 +837,20 @@ export function DecisionsView({
               return (
                 <DetailSection title="Across the Toolkit" subtitle="Connected data from other tools">
                   <div className="space-y-5">
-                    {/* Stakeholder Organization */}
+                    {/* Stakeholder Organization — clickable to ecosystem map */}
                     {orgName && (
                       <div>
                         <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">Stakeholder Organization</p>
                         <InlineRefCard
                           title={orgName}
-                          subtitle={orgId ? orgNameMap[orgId] ? "Organization" : undefined : undefined}
+                          subtitle="Organization"
                           accentColor="gold"
+                          onClick={orgId ? () => navigateTo(`/ecosystem-map?open=${orgId}`) : undefined}
                         />
                       </div>
                     )}
 
-                    {/* Related Outputs */}
+                    {/* Related Outputs — clickable to outputs page */}
                     {outputs && outputs.length > 0 && (
                       <div>
                         <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">Related Outputs</p>
@@ -652,6 +861,7 @@ export function DecisionsView({
                               title={output.title}
                               subtitle={output.is_published ? "Published" : "Draft"}
                               accentColor="purple"
+                              onClick={() => navigateTo(`/outputs?open=${output.id}`)}
                             />
                           ))}
                         </div>
@@ -671,6 +881,7 @@ export function DecisionsView({
                               title={inv.initiative_name}
                               subtitle={`${inv.amount ? formatAmount(inv.amount) : "—"} · ${COMPOUNDING_LABELS[inv.compounding] || inv.compounding}`}
                               accentColor="gold"
+                              onClick={() => navigateTo(`/investments?open=${inv.id}`)}
                             />
                           ))}
                         </div>
@@ -689,6 +900,7 @@ export function DecisionsView({
                               key={p.id}
                               title={p.name}
                               subtitle={`${p.period || "—"} · ${p.takeaway ? p.takeaway.slice(0, 80) + (p.takeaway.length > 80 ? "…" : "") : ""}`}
+                              onClick={() => navigateTo(`/precedents?open=${p.id}`)}
                             />
                           ))}
                         </div>
@@ -708,6 +920,7 @@ export function DecisionsView({
                               title={n.source_name || "Unknown source"}
                               subtitle={n.reality_text ? n.reality_text.slice(0, 80) + (n.reality_text.length > 80 ? "…" : "") : undefined}
                               accentColor="orange"
+                              onClick={() => navigateTo(`/narratives?open=${n.id}`)}
                             >
                               <span className={`text-[11px] font-semibold uppercase tracking-[0.06em] ${GAP_COLORS[n.gap] || "text-dim"}`}>
                                 {n.gap} gap
