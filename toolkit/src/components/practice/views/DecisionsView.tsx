@@ -74,49 +74,83 @@ function DeliberationTimeline({
   const totalSpan = end - start;
   if (totalSpan <= 0) return null;
 
-  const progressRatio = Math.max(0, Math.min(1, (now - start) / totalSpan));
-  const todayPercent = progressRatio * 100;
+  const todayRatio = Math.max(0, Math.min(1, (now - start) / totalSpan));
+  const todayPercent = todayRatio * 100;
+  const delibEndPercent = Math.max(0, Math.min(1, (delibEnd - start) / totalSpan)) * 100;
+  const pastDeliberation = now > delibEnd && now <= end;
 
-  // Determine bar fill color
-  const daysToLock = daysUntil(locksDate);
-  let fillColor = "bg-status-green";
-  if (daysToLock !== null && daysToLock <= 14) {
-    fillColor = "bg-status-red";
-  } else if (now > delibEnd && now <= end) {
-    fillColor = "bg-status-orange";
-  }
+  // Green fill from start to min(today, deliberation_end)
+  const greenWidth = pastDeliberation ? delibEndPercent : todayPercent;
+  // Orange fill from deliberation_end to today (only when past deliberation)
+  const orangeLeft = delibEndPercent;
+  const orangeWidth = pastDeliberation ? todayPercent - delibEndPercent : 0;
 
   return (
-    <div className="mt-3">
-      <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">
-        Deliberation Timeline
-      </p>
-      {/* Date labels */}
-      <div className="flex justify-between text-[11px] text-dim mb-1">
-        <span>{formatShortDate(deliberationStart)}</span>
-        <span>{formatShortDate(locksDate)}</span>
+    <div>
+      {/* Three date markers */}
+      <div className="relative flex justify-between font-mono text-[11px] text-dim mb-1.5">
+        <div className="text-left">
+          <span>{formatShortDate(deliberationStart)}</span>
+          <span className="block text-[10px] text-dim">Started</span>
+        </div>
+        {deliberationEnd && delibEndPercent > 15 && delibEndPercent < 85 && (
+          <div className="absolute text-center" style={{ left: `${delibEndPercent}%`, transform: "translateX(-50%)" }}>
+            <span>{formatShortDate(deliberationEnd)}</span>
+            <span className="block text-[10px] text-dim">Deliberation ends</span>
+          </div>
+        )}
+        <div className="text-right">
+          <span>{formatShortDate(locksDate)}</span>
+          <span className="block text-[10px] text-dim uppercase font-semibold">Locks</span>
+        </div>
       </div>
+
       {/* Bar */}
-      <div className="relative h-2 w-full rounded-full bg-surface-inset overflow-hidden">
-        <div
-          className={`absolute inset-y-0 left-0 rounded-full transition-all ${fillColor}`}
-          style={{ width: `${todayPercent}%` }}
-        />
-      </div>
-      {/* Today marker */}
-      {progressRatio > 0 && progressRatio < 1 && (
-        <div className="relative h-0">
+      <div className="relative h-2 w-full rounded-full bg-surface-inset">
+        {/* Green: deliberation progress */}
+        {greenWidth > 0 && (
           <div
-            className="absolute -top-[14px] w-0.5 h-[14px] bg-text"
+            className="absolute inset-y-0 left-0 rounded-l-full bg-status-green"
+            style={{ width: `${greenWidth}%`, borderRadius: greenWidth >= 100 ? "4px" : undefined }}
+          />
+        )}
+        {/* Orange: decision window (past deliberation end, before lock) */}
+        {orangeWidth > 0 && (
+          <div
+            className="absolute inset-y-0 bg-status-orange"
+            style={{ left: `${orangeLeft}%`, width: `${orangeWidth}%` }}
+          />
+        )}
+        {/* Deliberation end tick mark */}
+        {deliberationEnd && delibEndPercent > 0 && delibEndPercent < 100 && (
+          <div
+            className="absolute top-0 w-px h-full bg-border-medium"
+            style={{ left: `${delibEndPercent}%` }}
+          />
+        )}
+      </div>
+
+      {/* Today marker */}
+      {todayRatio > 0 && todayRatio < 1 && (
+        <div className="relative h-5 mt-0.5">
+          <div
+            className="absolute top-0 w-0.5 h-3 bg-text"
             style={{ left: `${todayPercent}%`, transform: "translateX(-50%)" }}
           />
           <div
-            className="absolute top-0.5 text-[10px] text-dim"
+            className="absolute top-3 text-[10px] font-semibold text-text"
             style={{ left: `${todayPercent}%`, transform: "translateX(-50%)" }}
           >
             Today
           </div>
         </div>
+      )}
+
+      {/* Phase labels */}
+      {pastDeliberation && (
+        <p className="text-[10px] text-status-orange mt-1 font-mono">
+          Decision window — lock approaching
+        </p>
       )}
     </div>
   );
@@ -124,14 +158,21 @@ function DeliberationTimeline({
 
 /* ── Props ──────────────────────────────────────────── */
 
+interface DepLink {
+  id: string;
+  description: string | null;
+}
+
 interface DecisionsViewProps {
   decisions: Decision[];
   outputsByDecision: Record<string, Array<{ id: string; title: string; is_published: boolean }>>;
+  dependsOn: Record<string, DepLink[]>;
+  dependedOnBy: Record<string, DepLink[]>;
 }
 
 /* ── Main Component ─────────────────────────────────── */
 
-export function DecisionsView({ decisions, outputsByDecision }: DecisionsViewProps) {
+export function DecisionsView({ decisions, outputsByDecision, dependsOn, dependedOnBy }: DecisionsViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
@@ -241,12 +282,32 @@ export function DecisionsView({ decisions, outputsByDecision }: DecisionsViewPro
                       </div>
                     )}
 
-                    {/* Dependency link */}
-                    {d.dependencies && (
-                      <p className="text-[12px] text-dim mt-1">
-                        &#9656; Depends on: {d.dependencies}
-                      </p>
-                    )}
+                    {/* Dependency links — show linked decision names, fall back to text */}
+                    {(() => {
+                      const deps = dependsOn[d.id];
+                      if (deps && deps.length > 0) {
+                        return deps.map((dep) => {
+                          const linked = decisionMap.get(dep.id);
+                          return (
+                            <p
+                              key={dep.id}
+                              className="text-[12px] text-accent mt-1 cursor-pointer hover:underline"
+                              onClick={(e) => { e.stopPropagation(); setSelectedId(dep.id); }}
+                            >
+                              &#9656; Depends on: {linked?.decision_title || "Unknown decision"}
+                            </p>
+                          );
+                        });
+                      }
+                      if (d.dependencies) {
+                        return (
+                          <p className="text-[12px] text-dim mt-1">
+                            &#9656; Depends on: {d.dependencies}
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
                   </ListCard>
                 );
               })}
@@ -323,107 +384,166 @@ export function DecisionsView({ decisions, outputsByDecision }: DecisionsViewPro
       >
         {selected && (
           <>
-            {/* Entity Details */}
-            <DetailSection title="Entity Details">
-              <div className="space-y-3">
-                {/* Status */}
+            {/* Decision Details — no section heading, fields are self-labelled */}
+            <div className="space-y-3 px-6 pt-2">
+              {/* Status */}
+              <div>
+                <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Status</p>
+                <div className="flex items-center gap-2">
+                  <StatusDot color={statusColor(selected.status)} />
+                  <span className="text-[13px] font-medium text-text">
+                    {DECISION_STATUS_LABELS[selected.status] || selected.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Stakeholder */}
+              {selected.stakeholder_name && (
                 <div>
-                  <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Status</p>
+                  <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Stakeholder</p>
+                  <p className="text-[13px] text-text">{selected.stakeholder_name}</p>
+                </div>
+              )}
+
+              {/* Locks Date + Countdown */}
+              {selected.locks_date && (
+                <div>
+                  <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Locks Date</p>
                   <div className="flex items-center gap-2">
-                    <StatusDot color={statusColor(selected.status)} />
-                    <span className="text-[13px] font-medium text-text">
-                      {DECISION_STATUS_LABELS[selected.status] || selected.status}
-                    </span>
+                    <span className="text-[13px] text-text">{formatDate(selected.locks_date)}</span>
+                    {(() => {
+                      const days = daysUntil(selected.locks_date);
+                      if (days === null) return null;
+                      return (
+                        <span className={`font-mono text-[12px] font-medium ${countdownColor(days)}`}>
+                          ({formatCountdown(days)})
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
+              )}
 
-                {/* Stakeholder */}
-                {selected.stakeholder_name && (
-                  <div>
-                    <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Stakeholder</p>
-                    <p className="text-[13px] text-text">{selected.stakeholder_name}</p>
+              {/* Deliberation Period */}
+              {(selected.deliberation_start || selected.deliberation_end) && (
+                <div>
+                  <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Deliberation Period</p>
+                  <p className="text-[13px] text-text">
+                    {formatDate(selected.deliberation_start)} — {formatDate(selected.deliberation_end)}
+                  </p>
+                </div>
+              )}
+
+              {/* Description */}
+              {selected.description && (
+                <div>
+                  <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Description</p>
+                  <p className="text-[13px] text-text leading-relaxed">{selected.description}</p>
+                </div>
+              )}
+
+              {/* Outcome */}
+              {selected.outcome && (
+                <div>
+                  <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Outcome</p>
+                  <p className="text-[13px] text-text leading-relaxed bg-surface-inset rounded-md px-4 py-3">
+                    {selected.outcome}
+                  </p>
+                </div>
+              )}
+
+              {/* Recurrence */}
+              {selected.is_recurring && (
+                <div>
+                  <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Recurrence</p>
+                  <div className="flex items-center gap-2">
+                    <StatusBadge label="Recurring" color="blue" />
                   </div>
-                )}
+                  {selected.recurrence_pattern && (
+                    <p className="text-[13px] text-text mt-1">{selected.recurrence_pattern}</p>
+                  )}
+                </div>
+              )}
+            </div>
 
-                {/* Locks Date + Countdown */}
-                {selected.locks_date && (
-                  <div>
-                    <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Locks Date</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] text-text">{formatDate(selected.locks_date)}</span>
-                      {(() => {
-                        const days = daysUntil(selected.locks_date);
-                        if (days === null) return null;
-                        return (
-                          <span className={`font-mono text-[12px] font-medium ${countdownColor(days)}`}>
-                            ({formatCountdown(days)})
-                          </span>
-                        );
-                      })()}
+            {/* Intervention Needed — callout block */}
+            {selected.intervention_needed && (
+              <DetailSection title="Intervention Needed">
+                <p className="text-[13px] text-text leading-relaxed bg-surface-inset rounded-md px-4 py-3 border-l-2 border-status-orange">
+                  {selected.intervention_needed}
+                </p>
+              </DetailSection>
+            )}
+
+            {/* Dependencies — linked decision cards + context text */}
+            {(() => {
+              const deps = dependsOn[selected.id];
+              const depBy = dependedOnBy[selected.id];
+              const hasLinked = (deps && deps.length > 0) || (depBy && depBy.length > 0);
+              const hasText = !!selected.dependencies;
+              if (!hasLinked && !hasText) return null;
+              return (
+                <DetailSection title="Dependencies">
+                  {/* Depends On — linked cards */}
+                  {deps && deps.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">Depends On</p>
+                      <div className="space-y-2">
+                        {deps.map((dep) => {
+                          const linked = decisionMap.get(dep.id);
+                          if (!linked) return null;
+                          const depDays = daysUntil(linked.locks_date);
+                          return (
+                            <InlineRefCard
+                              key={dep.id}
+                              title={linked.decision_title}
+                              subtitle={`${linked.stakeholder_name || "Unknown"} · ${DECISION_STATUS_LABELS[linked.status] || linked.status}${linked.locks_date ? ` · Locks ${formatShortDate(linked.locks_date)}` : ""}${depDays !== null ? ` (${formatCountdown(depDays)})` : ""}`}
+                              accentColor="blue"
+                              onClick={() => setSelectedId(dep.id)}
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Deliberation Period */}
-                {(selected.deliberation_start || selected.deliberation_end) && (
-                  <div>
-                    <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Deliberation Period</p>
-                    <p className="text-[13px] text-text">
-                      {formatDate(selected.deliberation_start)} — {formatDate(selected.deliberation_end)}
-                    </p>
-                  </div>
-                )}
-
-                {/* Description */}
-                {selected.description && (
-                  <div>
-                    <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Description</p>
-                    <p className="text-[13px] text-text leading-relaxed">{selected.description}</p>
-                  </div>
-                )}
-
-                {/* Intervention Needed */}
-                {selected.intervention_needed && (
-                  <div>
-                    <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Intervention Needed</p>
-                    <p className="text-[13px] text-text leading-relaxed bg-surface-inset rounded-md px-4 py-3 border-l-2 border-status-orange">
-                      {selected.intervention_needed}
-                    </p>
-                  </div>
-                )}
-
-                {/* Dependencies */}
-                {selected.dependencies && (
-                  <div>
-                    <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Dependencies</p>
-                    <p className="text-[13px] text-text leading-relaxed">{selected.dependencies}</p>
-                  </div>
-                )}
-
-                {/* Outcome */}
-                {selected.outcome && (
-                  <div>
-                    <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Outcome</p>
-                    <p className="text-[13px] text-text leading-relaxed bg-surface-inset rounded-md px-4 py-3">
-                      {selected.outcome}
-                    </p>
-                  </div>
-                )}
-
-                {/* Recurrence */}
-                {selected.is_recurring && (
-                  <div>
-                    <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-0.5">Recurrence</p>
-                    <div className="flex items-center gap-2">
-                      <StatusBadge label="Recurring" color="blue" />
+                  {/* Depended On By — reverse linked cards */}
+                  {depBy && depBy.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">Depended On By</p>
+                      <div className="space-y-2">
+                        {depBy.map((dep) => {
+                          const linked = decisionMap.get(dep.id);
+                          if (!linked) return null;
+                          const depDays = daysUntil(linked.locks_date);
+                          return (
+                            <InlineRefCard
+                              key={dep.id}
+                              title={linked.decision_title}
+                              subtitle={`${linked.stakeholder_name || "Unknown"} · ${DECISION_STATUS_LABELS[linked.status] || linked.status}${linked.locks_date ? ` · Locks ${formatShortDate(linked.locks_date)}` : ""}${depDays !== null ? ` (${formatCountdown(depDays)})` : ""}`}
+                              accentColor="blue"
+                              onClick={() => setSelectedId(dep.id)}
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
-                    {selected.recurrence_pattern && (
-                      <p className="text-[13px] text-text mt-1">{selected.recurrence_pattern}</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </DetailSection>
+                  )}
+
+                  {/* Dependency Context — the text field */}
+                  {hasText && (
+                    <div>
+                      {hasLinked && (
+                        <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">Dependency Context</p>
+                      )}
+                      <p className="text-[13px] text-muted leading-relaxed bg-surface-inset rounded-r-md px-4 py-3 border-l-2 border-border-medium">
+                        {selected.dependencies}
+                      </p>
+                    </div>
+                  )}
+                </DetailSection>
+              );
+            })()}
 
             {/* Deliberation Timeline */}
             {(selected.deliberation_start || selected.locks_date) && (
