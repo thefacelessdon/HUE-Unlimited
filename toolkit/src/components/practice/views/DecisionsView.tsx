@@ -163,16 +163,67 @@ interface DepLink {
   description: string | null;
 }
 
+interface InvSummary {
+  id: string;
+  initiative_name: string;
+  amount: number | null;
+  compounding: string;
+  status: string;
+}
+
+interface NarrSummary {
+  id: string;
+  source_name: string | null;
+  gap: string;
+  reality_text: string | null;
+}
+
+interface PrecSummary {
+  id: string;
+  name: string;
+  period: string | null;
+  involved: string | null;
+  takeaway: string | null;
+}
+
 interface DecisionsViewProps {
   decisions: Decision[];
   outputsByDecision: Record<string, Array<{ id: string; title: string; is_published: boolean }>>;
   dependsOn: Record<string, DepLink[]>;
   dependedOnBy: Record<string, DepLink[]>;
+  investmentsByOrg: Record<string, InvSummary[]>;
+  narrativesByOrg: Record<string, NarrSummary[]>;
+  precedents: PrecSummary[];
+  orgNameMap: Record<string, string>;
 }
+
+function formatAmount(amount: number | null): string {
+  if (amount === null) return "";
+  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`;
+  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}K`;
+  return `$${amount}`;
+}
+
+const COMPOUNDING_LABELS: Record<string, string> = {
+  compounding: "Compounding",
+  not_compounding: "Not compounding",
+  too_early: "Too early to tell",
+  unknown: "Unknown",
+};
+
+const GAP_COLORS: Record<string, string> = {
+  high: "text-status-red",
+  medium: "text-status-orange",
+  low: "text-status-blue",
+  aligned: "text-status-green",
+};
 
 /* ── Main Component ─────────────────────────────────── */
 
-export function DecisionsView({ decisions, outputsByDecision, dependsOn, dependedOnBy }: DecisionsViewProps) {
+export function DecisionsView({
+  decisions, outputsByDecision, dependsOn, dependedOnBy,
+  investmentsByOrg, narrativesByOrg, precedents, orgNameMap,
+}: DecisionsViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
@@ -556,38 +607,120 @@ export function DecisionsView({ decisions, outputsByDecision, dependsOn, depende
               </DetailSection>
             )}
 
-            {/* Related Outputs */}
+            {/* Across the Toolkit — all cross-tool context */}
             {(() => {
               const outputs = outputsByDecision[selected.id];
-              if (!outputs || outputs.length === 0) return null;
+              const orgId = selected.stakeholder_org_id;
+              const orgName = selected.stakeholder_name;
+              const orgInvestments = orgId ? investmentsByOrg[orgId] : undefined;
+              const orgNarratives = orgId ? narrativesByOrg[orgId] : undefined;
+              // Match precedents by org name appearing in the "involved" field
+              const relevantPrecedents = orgName
+                ? precedents.filter((p) => p.involved?.toLowerCase().includes(orgName.toLowerCase()))
+                : [];
+
+              const hasContent = orgName || (outputs && outputs.length > 0) ||
+                (orgInvestments && orgInvestments.length > 0) ||
+                relevantPrecedents.length > 0 ||
+                (orgNarratives && orgNarratives.length > 0);
+
+              if (!hasContent) return null;
+
               return (
-                <DetailSection title="Related Outputs" count={outputs.length}>
-                  <div className="space-y-2">
-                    {outputs.map((output) => (
-                      <InlineRefCard
-                        key={output.id}
-                        title={output.title}
-                        subtitle={output.is_published ? "Published" : "Draft"}
-                        accentColor="purple"
-                      />
-                    ))}
+                <DetailSection title="Across the Toolkit" subtitle="Connected data from other tools">
+                  <div className="space-y-5">
+                    {/* Stakeholder Organization */}
+                    {orgName && (
+                      <div>
+                        <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">Stakeholder Organization</p>
+                        <InlineRefCard
+                          title={orgName}
+                          subtitle={orgId ? orgNameMap[orgId] ? "Organization" : undefined : undefined}
+                          accentColor="gold"
+                        />
+                      </div>
+                    )}
+
+                    {/* Related Outputs */}
+                    {outputs && outputs.length > 0 && (
+                      <div>
+                        <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">Related Outputs</p>
+                        <div className="space-y-2">
+                          {outputs.map((output) => (
+                            <InlineRefCard
+                              key={output.id}
+                              title={output.title}
+                              subtitle={output.is_published ? "Published" : "Draft"}
+                              accentColor="purple"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stakeholder's Investments */}
+                    {orgInvestments && orgInvestments.length > 0 && (
+                      <div>
+                        <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">
+                          What {orgName} has invested
+                        </p>
+                        <div className="space-y-2">
+                          {orgInvestments.map((inv) => (
+                            <InlineRefCard
+                              key={inv.id}
+                              title={inv.initiative_name}
+                              subtitle={`${inv.amount ? formatAmount(inv.amount) : "—"} · ${COMPOUNDING_LABELS[inv.compounding] || inv.compounding}`}
+                              accentColor="gold"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Relevant Precedents */}
+                    {relevantPrecedents.length > 0 && (
+                      <div>
+                        <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">
+                          What&rsquo;s been tried before
+                        </p>
+                        <div className="space-y-2">
+                          {relevantPrecedents.map((p) => (
+                            <InlineRefCard
+                              key={p.id}
+                              title={p.name}
+                              subtitle={`${p.period || "—"} · ${p.takeaway ? p.takeaway.slice(0, 80) + (p.takeaway.length > 80 ? "…" : "") : ""}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Related Narratives */}
+                    {orgNarratives && orgNarratives.length > 0 && (
+                      <div>
+                        <p className="text-[11px] font-semibold text-dim uppercase tracking-[0.06em] mb-2">
+                          What&rsquo;s being said
+                        </p>
+                        <div className="space-y-2">
+                          {orgNarratives.map((n) => (
+                            <InlineRefCard
+                              key={n.id}
+                              title={n.source_name || "Unknown source"}
+                              subtitle={n.reality_text ? n.reality_text.slice(0, 80) + (n.reality_text.length > 80 ? "…" : "") : undefined}
+                              accentColor="orange"
+                            >
+                              <span className={`text-[11px] font-semibold uppercase tracking-[0.06em] ${GAP_COLORS[n.gap] || "text-dim"}`}>
+                                {n.gap} gap
+                              </span>
+                            </InlineRefCard>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </DetailSection>
               );
             })()}
-
-            {/* Across the Toolkit */}
-            {selected.stakeholder_name && (
-              <DetailSection title="Across the Toolkit">
-                <div className="space-y-2">
-                  <InlineRefCard
-                    title={selected.stakeholder_name}
-                    subtitle="Stakeholder Organization"
-                    accentColor="blue"
-                  />
-                </div>
-              </DetailSection>
-            )}
 
             {/* Record */}
             <DetailSection title="Record">
