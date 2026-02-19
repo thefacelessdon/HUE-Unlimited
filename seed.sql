@@ -535,7 +535,7 @@ INSERT INTO narratives (ecosystem_id, source_org_id, source_name, source_type, d
 -- INTELLIGENCE LAYER: OUTPUTS (3)
 -- ──────────────────────────────────────────
 
-INSERT INTO outputs (id, ecosystem_id, output_type, title, content, summary, target_stakeholder_id, triggered_by_decision_id, is_published, published_at) VALUES
+INSERT INTO outputs (id, ecosystem_id, output_type, title, content, summary, target_stakeholder_id, triggered_by_decision_id, is_published, published_at, delivery_status, delivered_at, delivered_to_contact, delivery_notes) VALUES
 
 ('e0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'directional_brief',
  'CACHE 2026 Grant Cycle — Pre-Deliberation Brief',
@@ -560,7 +560,8 @@ RECOMMENDED ACTIONS:
 - Open a coordination conversation with AAC about NWA grant alignment
 - Increase the individual practitioner grant ceiling to attract applications for substantial creative projects',
  'Pre-deliberation brief for CACHE board ahead of 2026 grant cycle priority-setting. Surfaces concentration trend, district plan overlap risk, and practitioner retention signal.',
- 'b0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', true, '2026-02-10'),
+ 'b0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', true, '2026-02-10',
+ 'delivered', '2026-02-10', 'Rachel Torres, Executive Director', 'Emailed Feb 10. Discussed in Feb 12 board prep meeting. Rachel confirmed the concentration data was new to the board.'),
 
 ('e0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'memory_transfer',
  'Public Art Phases 1-2: What Phase 3 Needs to Know',
@@ -591,7 +592,8 @@ WHAT PHASE 3 SHOULD CONSIDER:
 - Post-installation evaluation that feeds into future phases
 - Budget allocation that includes local artist professional development, not just production',
  'Institutional memory transfer for City of Bentonville ahead of Public Art Phase 3 decision. Compares Phases 1-2 outcomes with Fayetteville model.',
- 'b0000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000006', true, '2026-02-05'),
+ 'b0000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000006', true, '2026-02-05',
+ 'delivered', '2026-02-05', 'Sarah Collins, Cultural Affairs Liaison', 'Hand-delivered at City Hall meeting. Sarah requested additional data on local vs. non-local artist economic impact.'),
 
 ('e0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001', 'state_of_ecosystem',
  'NWA Cultural Ecosystem — State of the System (Early 2026)',
@@ -622,7 +624,8 @@ WHAT NEEDS TO HAPPEN NEXT:
 5. Infrastructure gaps (studio space, venue infrastructure) need to be named as investment priorities, not assumed to develop organically
 6. The opportunity layer should become a permanent piece of ecosystem infrastructure, making the flow of opportunities visible to all practitioners regardless of their institutional connections',
  'Comprehensive state-of-the-ecosystem synthesis drawing from all seven toolkit components. Diagnoses the gap between institutional investment and practitioner sustainability.',
- NULL, NULL, true, '2026-02-15');
+ NULL, NULL, true, '2026-02-15',
+ 'published', NULL, NULL, 'Standing document. Shared with CACHE and Crystal Bridges leadership. Not decision-specific.');
 
 -- Output References (linking outputs to their source data)
 INSERT INTO output_references (output_id, reference_type, reference_id, context_note) VALUES
@@ -636,7 +639,14 @@ INSERT INTO output_references (output_id, reference_type, reference_id, context_
   ('e0000000-0000-0000-0000-000000000002', 'investment', 'c0000000-0000-0000-0000-000000000004', 'Phase 1 investment and outcomes'),
   ('e0000000-0000-0000-0000-000000000002', 'investment', 'c0000000-0000-0000-0000-000000000005', 'Phase 2 investment and outcomes'),
   ('e0000000-0000-0000-0000-000000000002', 'investment', 'c0000000-0000-0000-0000-000000000012', 'Fayetteville model comparison'),
-  ('e0000000-0000-0000-0000-000000000002', 'decision', 'd0000000-0000-0000-0000-000000000006', 'Triggered by Phase 3 decision window');
+  ('e0000000-0000-0000-0000-000000000002', 'decision', 'd0000000-0000-0000-0000-000000000006', 'Triggered by Phase 3 decision window'),
+  -- Additional CACHE brief references: narratives + precedent
+  ('e0000000-0000-0000-0000-000000000001', 'narrative', (SELECT id FROM narratives WHERE source_name ILIKE '%CACHE%Annual%' LIMIT 1), 'CACHE claims "record investment" — true by total, misleading by distribution'),
+  ('e0000000-0000-0000-0000-000000000001', 'narrative', (SELECT id FROM narratives WHERE source_name ILIKE '%Practitioner%' LIMIT 1), 'Practitioner interviews confirm income declining despite rising total investment'),
+  ('e0000000-0000-0000-0000-000000000001', 'precedent', (SELECT id FROM precedents WHERE name ILIKE '%AAC-CACHE%' LIMIT 1), 'Pattern of uncoordinated grant overlap between AAC and CACHE'),
+  -- Public art memory transfer: precedent references
+  ('e0000000-0000-0000-0000-000000000002', 'precedent', (SELECT id FROM precedents WHERE name ILIKE '%Public Art%Phase 1%' LIMIT 1), 'Phase 1 precedent: opaque selection, non-local artists, community exclusion'),
+  ('e0000000-0000-0000-0000-000000000002', 'precedent', (SELECT id FROM precedents WHERE name ILIKE '%Fayetteville Cultural District%' LIMIT 1), 'Fayetteville model: inclusive process, local priority, community satisfaction');
 
 
 -- ──────────────────────────────────────────

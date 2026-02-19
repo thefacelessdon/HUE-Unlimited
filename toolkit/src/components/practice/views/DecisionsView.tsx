@@ -868,6 +868,14 @@ export function DecisionsView({
                       </div>
                     )}
 
+                    {/* Draft output for this decision */}
+                    <button
+                      onClick={() => navigateTo(`/outputs?create_for_decision=${selected.id}`)}
+                      className="text-[12px] text-accent hover:underline"
+                    >
+                      Draft output for this decision →
+                    </button>
+
                     {/* Stakeholder's Investments */}
                     {orgInvestments && orgInvestments.length > 0 && (
                       <div>

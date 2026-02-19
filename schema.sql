@@ -361,6 +361,10 @@ CREATE TABLE outputs (
   triggered_by_decision_id UUID REFERENCES decisions(id) ON DELETE SET NULL,
   is_published BOOLEAN DEFAULT false,
   published_at TIMESTAMPTZ,
+  delivery_status TEXT DEFAULT 'draft' CHECK (delivery_status IN ('draft', 'published', 'delivered', 'acknowledged')),
+  delivered_at TIMESTAMPTZ,
+  delivered_to_contact TEXT,
+  delivery_notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

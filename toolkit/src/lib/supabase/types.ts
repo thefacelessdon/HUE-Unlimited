@@ -243,6 +243,8 @@ export interface Narrative {
   updated_at: string;
 }
 
+export type DeliveryStatus = 'draft' | 'published' | 'delivered' | 'acknowledged';
+
 export interface Output {
   id: string;
   ecosystem_id: string;
@@ -255,8 +257,20 @@ export interface Output {
   triggered_by_decision_id: string | null;
   is_published: boolean;
   published_at: string | null;
+  delivery_status: DeliveryStatus;
+  delivered_at: string | null;
+  delivered_to_contact: string | null;
+  delivery_notes: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface OutputReference {
+  id: string;
+  output_id: string;
+  reference_type: string;
+  reference_id: string;
+  context_note: string | null;
 }
 
 export interface Submission {
@@ -454,6 +468,7 @@ export interface Database {
       opportunities: { Row: Opportunity; Insert: Partial<Opportunity>; Update: Partial<Opportunity> };
       narratives: { Row: Narrative; Insert: Partial<Narrative>; Update: Partial<Narrative> };
       outputs: { Row: Output; Insert: Partial<Output>; Update: Partial<Output> };
+      output_references: { Row: OutputReference; Insert: Partial<OutputReference>; Update: Partial<OutputReference> };
       submissions: { Row: Submission; Insert: Partial<Submission>; Update: Partial<Submission> };
       activity_log: { Row: ActivityLog; Insert: Partial<ActivityLog>; Update: Partial<ActivityLog> };
       tags: { Row: Tag; Insert: Partial<Tag>; Update: Partial<Tag> };
