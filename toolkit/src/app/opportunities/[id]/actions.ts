@@ -121,7 +121,13 @@ export async function submitIntent(
   });
 
   if (error) {
-    return { success: false, error: "Failed to record interest. Please try again." };
+    console.error("submitIntent insert error:", error.message, error.details, error.hint);
+    return {
+      success: false,
+      error: error.message?.includes("column")
+        ? "Database schema needs updating. Run migration-intent-layer.sql in Supabase."
+        : "Failed to record interest. Please try again.",
+    };
   }
 
   return { success: true };

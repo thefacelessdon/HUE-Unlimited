@@ -37,6 +37,11 @@ DROP POLICY IF EXISTS "Users can insert own interests" ON opportunity_interests;
 CREATE POLICY "Anyone can insert interests" ON opportunity_interests
   FOR INSERT WITH CHECK (true);
 
+-- Allow practice team to update interests (status changes, practitioner linking)
+DROP POLICY IF EXISTS "Authenticated users can update interests" ON opportunity_interests;
+CREATE POLICY "Authenticated users can update interests" ON opportunity_interests
+  FOR UPDATE TO authenticated USING (true);
+
 -- Backfill existing interests with profile names/emails
 UPDATE opportunity_interests oi
 SET

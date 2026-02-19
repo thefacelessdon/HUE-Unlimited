@@ -51,9 +51,28 @@ CREATE POLICY "Users can insert own profile" ON public_profiles
 CREATE TABLE IF NOT EXISTS opportunity_interests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   opportunity_id UUID REFERENCES opportunities(id) NOT NULL,
-  profile_id UUID REFERENCES public_profiles(id) NOT NULL,
+  profile_id UUID REFERENCES public_profiles(id),
+
+  -- Practitioner info (from the open intent form — no auth required)
+  practitioner_name TEXT,
+  practitioner_email TEXT,
+  practitioner_discipline TEXT,
   notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+
+  -- Lifecycle tracking
+  status TEXT DEFAULT 'expressed'
+    CHECK (status IN ('expressed', 'applied', 'awarded', 'not_awarded', 'withdrew', 'did_not_apply')),
+
+  -- Follow-up
+  followed_up_at TIMESTAMPTZ,
+  followup_response JSONB,
+  outcome_notes TEXT,
+
+  -- Practitioner linking (optional match to ecosystem map)
+  practitioner_id UUID,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 ALTER TABLE opportunity_interests ENABLE ROW LEVEL SECURITY;
@@ -61,13 +80,15 @@ ALTER TABLE opportunity_interests ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Interests viewable by owner and team" ON opportunity_interests
   FOR SELECT USING (true);
 
-CREATE POLICY "Users can insert own interests" ON opportunity_interests
-  FOR INSERT WITH CHECK (
-    profile_id IN (SELECT id FROM public_profiles WHERE user_id = auth.uid())
-  );
+CREATE POLICY "Anyone can insert interests" ON opportunity_interests
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update interests" ON opportunity_interests
+  FOR UPDATE TO authenticated USING (true);
 
 CREATE INDEX idx_interests_opportunity ON opportunity_interests(opportunity_id);
 CREATE INDEX idx_interests_profile ON opportunity_interests(profile_id);
+CREATE INDEX idx_interests_email ON opportunity_interests(practitioner_email);
 
 -- ──────────────────────────────────────────
 -- 3. ENGAGEMENTS
