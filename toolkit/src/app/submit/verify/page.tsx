@@ -16,7 +16,7 @@ export default async function VerifyPage({ searchParams }: PageProps) {
 
   if (!type || !id) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="min-h-screen bg-surface text-text flex items-center justify-center px-4">
         <p className="text-muted text-sm">Invalid verification link.</p>
       </div>
     );
@@ -33,7 +33,7 @@ export default async function VerifyPage({ searchParams }: PageProps) {
 
     if (!data) {
       return (
-        <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="min-h-screen bg-surface text-text flex items-center justify-center px-4">
           <p className="text-muted text-sm">Organization not found.</p>
         </div>
       );
@@ -42,7 +42,7 @@ export default async function VerifyPage({ searchParams }: PageProps) {
     const org = data as Pick<Organization, "id" | "name" | "org_type" | "mandate" | "controls" | "decision_cycle">;
 
     return (
-      <div className="min-h-screen bg-surface py-12 px-4">
+      <div className="min-h-screen bg-surface text-text py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <OrgVerificationForm org={org} />
         </div>
@@ -59,7 +59,7 @@ export default async function VerifyPage({ searchParams }: PageProps) {
 
     if (!data) {
       return (
-        <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="min-h-screen bg-surface text-text flex items-center justify-center px-4">
           <p className="text-muted text-sm">Practitioner not found.</p>
         </div>
       );
@@ -68,7 +68,7 @@ export default async function VerifyPage({ searchParams }: PageProps) {
     const practitioner = data as Pick<Practitioner, "id" | "name" | "discipline" | "tenure" | "income_sources" | "retention_factors" | "risk_factors">;
 
     return (
-      <div className="min-h-screen bg-surface py-12 px-4">
+      <div className="min-h-screen bg-surface text-text py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <PractitionerCheckInForm practitioner={practitioner} />
         </div>
@@ -77,7 +77,7 @@ export default async function VerifyPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen bg-surface text-text flex items-center justify-center px-4">
       <p className="text-muted text-sm">Unknown verification type.</p>
     </div>
   );
