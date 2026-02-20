@@ -20,9 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
-        className="antialiased bg-surface text-text"
+        className="antialiased"
         style={{
           ["--font-display" as string]: "'DM Serif Display', serif",
           ["--font-body" as string]: "'DM Sans', sans-serif",

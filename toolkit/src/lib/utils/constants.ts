@@ -108,6 +108,15 @@ export const OUTPUT_TYPE_LABELS: Record<string, string> = {
   foundational_text: "Foundational Text",
 };
 
+export const OUTPUT_TYPE_COLORS: Record<string, string> = {
+  directional_brief: "border-l-status-blue",
+  memory_transfer: "border-l-accent",
+  state_of_ecosystem: "border-l-status-green",
+  orientation_framework: "border-l-status-purple",
+  field_note: "border-l-dim",
+  foundational_text: "border-l-accent",
+};
+
 export const NARRATIVE_SOURCE_LABELS: Record<string, string> = {
   institutional: "Institutional",
   regional_positioning: "Regional Positioning",

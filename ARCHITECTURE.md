@@ -1,4 +1,4 @@
-# Cultural Architecture Platform — Technical Architecture
+# Cultural Architecture Toolkit — Architecture
 
 ## What This Is
 
@@ -12,16 +12,18 @@ The surfaces share a database. A completed engagement on the public surface auto
 
 ---
 
-## Stack
+## Tech Stack
 
-- **Database**: Supabase (Postgres + Auth + RLS + Storage)
-- **Front-end**: Next.js 14+ (App Router) + TypeScript
-- **Styling**: CSS Modules with design tokens (not Tailwind utility classes — the design language is too specific for utility-first)
-- **Auth**: Supabase Auth (email + password for demo; magic links for production)
-- **Payments**: Stripe Connect (Phase 3, when funder alignment exists)
-- **Deployment**: Vercel
-- **Email**: Resend (opportunity digest, future)
-- **Fonts**: Google Fonts — Instrument Serif, DM Sans, JetBrains Mono
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 14 (App Router, React 18) |
+| Language | TypeScript 5 |
+| Database | Supabase (PostgreSQL + RLS + Auth + Storage) |
+| Styling | Tailwind CSS 3.4 + custom CSS properties |
+| Charts | Recharts 3.7 |
+| Auth | Supabase Auth (email + password for demo; magic links for production) |
+| Deployment | Vercel |
+| Fonts | DM Serif Display, DM Sans, JetBrains Mono |
 
 ---
 
@@ -38,137 +40,229 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # server-side only
 ## Project Structure
 
 ```
-platform/
+toolkit/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx                    # Root layout, font imports, providers
-│   │   ├── page.tsx                      # Landing — routes to /opportunities or /tools/dashboard
-│   │   │
-│   │   ├── (public)/                     # PUBLIC SURFACE (light theme)
-│   │   │   ├── layout.tsx                # Light theme wrapper, public header/footer
-│   │   │   ├── opportunities/
-│   │   │   │   ├── page.tsx              # Card grid + filters + summary line
-│   │   │   │   ├── [id]/page.tsx         # Full detail + prep context + funder info + engagement path
-│   │   │   │   └── submit/page.tsx       # Community opportunity submission form
-│   │   │   ├── profile/
-│   │   │   │   ├── page.tsx              # Create / edit own profile (auth required)
-│   │   │   │   └── [id]/page.tsx         # Public profile view
-│   │   │   ├── engagements/
-│   │   │   │   └── [id]/page.tsx         # Shared engagement workspace (auth required)
-│   │   │   └── login/
-│   │   │       └── page.tsx              # Auth page (signup + login)
-│   │   │
-│   │   ├── (practice)/                   # PRACTICE SURFACE (dark theme, auth required)
-│   │   │   ├── layout.tsx                # Sidebar nav, auth gate, dark theme
-│   │   │   ├── tools/
-│   │   │   │   ├── dashboard/page.tsx    # Overview: stats, stale items, upcoming interventions
-│   │   │   │   ├── ecosystem-map/page.tsx
-│   │   │   │   ├── investments/page.tsx  # List + Landscape toggle
-│   │   │   │   ├── decisions/page.tsx    # List + Timeline toggle
-│   │   │   │   ├── precedents/page.tsx
-│   │   │   │   ├── opportunities/page.tsx # Practice view with engagement tracking
-│   │   │   │   ├── narratives/page.tsx
-│   │   │   │   ├── outputs/page.tsx
-│   │   │   │   └── submissions/page.tsx  # Review queue
-│   │   │   └── settings/page.tsx
-│   │   │
+│   │   ├── layout.tsx                    # Root layout (fonts, global CSS)
+│   │   ├── page.tsx                      # Root redirect (→ /dashboard or /auth/login)
+│   │   ├── globals.css                   # Design tokens + pub-theme styles
+│   │   ├── (practice)/                   # Authenticated practice surface
+│   │   │   ├── layout.tsx                # Auth check, sidebar, dark theme
+│   │   │   ├── dashboard/page.tsx        # Overview: ecosystem stats, headlines
+│   │   │   ├── ecosystem-map/page.tsx    # Organizations, contacts, practitioners
+│   │   │   ├── investments/page.tsx      # Investment ledger with compounding chains
+│   │   │   ├── decisions/page.tsx        # Decision calendar and interventions
+│   │   │   ├── precedents/page.tsx       # Historical archive
+│   │   │   ├── opportunity-tracker/page.tsx  # Internal opportunity management
+│   │   │   ├── narratives/page.tsx       # Narrative vs. reality tracking
+│   │   │   ├── outputs/page.tsx          # Intelligence layer (briefs, analyses)
+│   │   │   ├── submissions/page.tsx      # Review queue for external submissions
+│   │   │   └── settings/page.tsx         # Configuration
+│   │   ├── opportunities/                # Public surface (light theme, no auth)
+│   │   │   ├── layout.tsx                # pub-theme wrapper + metadata
+│   │   │   ├── page.tsx                  # Public opportunity listing
+│   │   │   └── submit/page.tsx           # External opportunity submission form
 │   │   ├── auth/
-│   │   │   └── callback/route.ts         # Auth callback handler
-│   │   │
-│   │   └── api/
-│   │       ├── engagement-complete/route.ts  # Webhook: engagement → investment
-│   │       └── digest/route.ts               # Cron: weekly opportunity digest
-│   │
+│   │   │   ├── login/page.tsx            # Login (password + magic link)
+│   │   │   ├── callback/route.ts         # OAuth callback handler
+│   │   │   └── logout/route.ts           # Sign out
+│   │   └── submit/
+│   │       ├── flag/page.tsx             # Decision flag submission form
+│   │       ├── practitioner/page.tsx     # Practitioner tip submission form
+│   │       └── verify/page.tsx           # Verification forms for orgs/practitioners
 │   ├── components/
-│   │   ├── ui/                           # Shared base components
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Select.tsx
-│   │   │   ├── Badge.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   └── StatusDot.tsx
-│   │   │
+│   │   ├── ui/                           # Reusable primitives (Button, Input, Badge, etc.)
 │   │   ├── practice/                     # Practice surface components
-│   │   │   ├── Sidebar.tsx
-│   │   │   ├── DetailPanel.tsx           # Slide-over detail panel (shared across tools)
-│   │   │   ├── InlineReferenceCard.tsx   # Colored left-border entity cards
-│   │   │   ├── AcrossTheToolkit.tsx      # Cross-tool connections section
-│   │   │   ├── EditorialStats.tsx        # Sentence-format stats
-│   │   │   ├── TimelineBar.tsx           # Deliberation timeline visualization
-│   │   │   ├── LandscapeCharts.tsx       # Investment analytical views
-│   │   │   └── DecisionTimeline.tsx      # Gantt-style decision view
-│   │   │
-│   │   ├── public/                       # Public surface components
-│   │   │   ├── PublicHeader.tsx
-│   │   │   ├── PublicFooter.tsx
-│   │   │   ├── OpportunityCard.tsx
-│   │   │   ├── OpportunityFilters.tsx
-│   │   │   ├── SummaryLine.tsx
-│   │   │   ├── PreparationContext.tsx    # Gold-bordered prep context callout
-│   │   │   ├── FunderContext.tsx         # "About this funder" section
-│   │   │   ├── ProfileForm.tsx
-│   │   │   ├── ProfileCard.tsx
-│   │   │   ├── EngagementWorkspace.tsx
-│   │   │   ├── MilestoneTracker.tsx
-│   │   │   ├── DeliverableTracker.tsx
-│   │   │   ├── PaymentTracker.tsx
-│   │   │   └── ActivityLog.tsx
-│   │   │
-│   │   └── shared/
-│   │       ├── AmountDisplay.tsx         # Handles min===max, ranges, fallbacks
-│   │       ├── CountdownBadge.tsx        # Color-coded deadline countdown
-│   │       ├── TypeBadge.tsx             # Colored opportunity type badges
-│   │       └── CompoundingBadge.tsx
-│   │
-│   ├── lib/
-│   │   ├── supabase/
-│   │   │   ├── client.ts                 # Browser client
-│   │   │   ├── server.ts                 # Server client
-│   │   │   ├── middleware.ts             # Auth middleware
-│   │   │   └── types.ts                  # Generated from schema
-│   │   │
-│   │   ├── queries/                      # Reusable data fetching
-│   │   │   ├── organizations.ts
-│   │   │   ├── investments.ts
-│   │   │   ├── decisions.ts
-│   │   │   ├── precedents.ts
-│   │   │   ├── opportunities.ts
-│   │   │   ├── narratives.ts
-│   │   │   ├── outputs.ts
-│   │   │   ├── profiles.ts              # Public profiles
-│   │   │   ├── engagements.ts           # Engagement workspace data
-│   │   │   ├── interests.ts             # Opportunity interest signals
-│   │   │   └── stats.ts                 # Dashboard aggregations
-│   │   │
-│   │   ├── actions/                      # Server actions
-│   │   │   ├── createProfile.ts
-│   │   │   ├── expressInterest.ts
-│   │   │   ├── updateMilestone.ts
-│   │   │   ├── confirmCompletion.ts
-│   │   │   ├── createInvestmentFromEngagement.ts
-│   │   │   └── submitOpportunity.ts
-│   │   │
-│   │   └── utils/
-│   │       ├── formatting.ts             # Currency, dates, countdowns
-│   │       ├── constants.ts              # Enum labels, colors
-│   │       └── amounts.ts                # formatAmountRange logic
-│   │
-│   └── styles/
-│       ├── tokens.css                    # Design tokens (both themes)
-│       ├── practice.css                  # Dark theme variables
-│       └── public.css                    # Light theme variables
-│
-├── supabase/
-│   ├── schema.sql                        # Full database schema
-│   └── seed.sql                          # NWA prototype seed data
-│
-├── public/
-├── .env.local
-├── next.config.js
-├── tsconfig.json
-└── package.json
+│   │   │   ├── Sidebar.tsx               # Navigation sidebar
+│   │   │   ├── StatsBar.tsx              # Ecosystem stats bar
+│   │   │   └── views/*View.tsx           # Page-specific view components
+│   │   ├── contributor/                  # External verification forms
+│   │   └── public/                       # Public surface components
+│   │       ├── PublicOpportunities.tsx    # Card grid + filters + detail overlay
+│   │       ├── OpportunitySubmitForm.tsx  # External submission form
+│   │       ├── DecisionFlagForm.tsx       # Decision flag public form
+│   │       └── PractitionerTipForm.tsx   # Practitioner tip public form
+│   └── lib/
+│       ├── supabase/
+│       │   ├── client.ts                 # Browser Supabase client
+│       │   ├── server.ts                 # Server Supabase client (cookies)
+│       │   ├── middleware.ts             # Auth middleware
+│       │   └── types.ts                  # TypeScript types matching schema
+│       └── utils/
+│           ├── constants.ts              # Enum labels, status colors, thresholds
+│           └── formatting.ts             # Currency, date, countdown helpers
+├── schema.sql                            # ← Source of truth (root)
+├── seed.sql                              # ← Full demo dataset (root)
+└── reset.sql                             # ← Drop-everything script (root)
 ```
+
+---
+
+## Database Schema
+
+### Source Files
+
+| File | Purpose |
+|------|---------|
+| `schema.sql` | Complete DDL: enums, tables, indexes, views, RLS policies, functions, triggers, and minimal seed data |
+| `seed.sql` | Comprehensive NWA prototype dataset (run after schema.sql) |
+| `reset.sql` | Drops all objects for a clean rebuild |
+
+### Enums
+
+| Enum | Values |
+|------|--------|
+| `org_type` | foundation, government, cultural_institution, corporate, nonprofit, intermediary, education, media |
+| `investment_status` | planned, active, completed, cancelled |
+| `investment_category` | direct_artist_support, strategic_planning, public_art, artist_development, education_training, sector_development, institutional_capacity, infrastructure, programming, communications |
+| `compounding_status` | compounding, not_compounding, too_early, unknown |
+| `decision_status` | upcoming, deliberating, locked, completed |
+| `opportunity_type` | grant, rfp, commission, project, residency, program, fellowship |
+| `opportunity_status` | open, closing_soon, closed, awarded |
+| `narrative_source_type` | institutional, regional_positioning, media_coverage, practitioner |
+| `gap_level` | high, medium, low, aligned |
+| `output_type` | directional_brief, orientation_framework, state_of_ecosystem, memory_transfer, field_note, foundational_text |
+| `submission_status` | pending, approved, rejected |
+| `user_role` | partner, project_lead, contributor |
+
+### Tables
+
+#### Core
+
+| Table | Purpose | Key Fields |
+|-------|---------|------------|
+| `profiles` | Extends `auth.users` | id (FK → auth.users), full_name, role, email |
+| `ecosystems` | Multi-ecosystem support | name, slug, description, region |
+
+#### 1. Ecosystem Map
+
+| Table | Purpose | Key Relationships |
+|-------|---------|-------------------|
+| `organizations` | Stakeholder entities | → ecosystems. Fields: name, org_type, mandate, controls, constraints, decision_cycle, website, notes |
+| `contacts` | People at orgs | → organizations. Fields: name, title, role_description, is_decision_maker |
+| `org_relationships` | Inter-org links | → organizations (org_a_id, org_b_id). Fields: relationship_type, strength |
+| `practitioners` | Individual creatives | → ecosystems. Fields: discipline, tenure, income_sources, retention_factors, risk_factors, institutional_affiliations |
+
+#### 2. Investment Ledger
+
+| Table | Purpose | Key Relationships |
+|-------|---------|-------------------|
+| `investments` | Funding flows | → ecosystems, → organizations (source_org_id), → investments (builds_on_id, led_to_id), → precedents. Fields: initiative_name, amount, period, category, status, compounding, compounding_notes |
+
+#### 3. Decision Calendar
+
+| Table | Purpose | Key Relationships |
+|-------|---------|-------------------|
+| `decisions` | Upcoming/active decisions | → ecosystems, → organizations (stakeholder). Fields: decision_title, deliberation_start/end, locks_date, status, dependencies, intervention_needed, is_recurring |
+| `decision_dependencies` | Decision → decision links | → decisions (decision_id, depends_on_id) |
+
+#### 4. Precedent Archive
+
+| Table | Purpose | Key Relationships |
+|-------|---------|-------------------|
+| `precedents` | Historical reference | → ecosystems, → investments. Fields: name, period, involved, what_produced, what_worked, what_didnt, connects_to, takeaway |
+
+#### 5. Opportunity Layer
+
+| Table | Purpose | Key Relationships |
+|-------|---------|-------------------|
+| `opportunities` | Available opportunities | → ecosystems, → organizations (source_org_id), → investments (awarded_investment_id), → profiles (submitted_by). Fields: title, opportunity_type, amount_min/max, deadline, eligibility, status |
+
+#### 6. Narrative Record
+
+| Table | Purpose | Key Relationships |
+|-------|---------|-------------------|
+| `narratives` | Story vs. reality | → ecosystems, → organizations (source_org_id). Fields: source_type, narrative_text, reality_text, gap, evidence_notes |
+
+#### 7. Intelligence Layer
+
+| Table | Purpose | Key Relationships |
+|-------|---------|-------------------|
+| `outputs` | Produced analysis | → ecosystems, → profiles (author), → organizations (target_stakeholder), → decisions (triggered_by). Fields: output_type, title, content, summary, is_published, file_url, file_type |
+| `output_references` | Citations in outputs | → outputs. Fields: reference_type, reference_id, context_note |
+
+#### Supporting
+
+| Table | Purpose |
+|-------|---------|
+| `tags` | Shared tagging (sector, theme, geography) |
+| `organization_tags` | Junction: org ↔ tag |
+| `investment_tags` | Junction: investment ↔ tag |
+| `opportunity_tags` | Junction: opportunity ↔ tag |
+| `precedent_tags` | Junction: precedent ↔ tag |
+| `submissions` | External submission review queue |
+| `activity_log` | Audit trail |
+
+### Views
+
+| View | Purpose |
+|------|---------|
+| `stale_entries` | Entries overdue for review (orgs 90d, investments 60d, decisions 30d, opportunities 14d, practitioners 180d) |
+| `ecosystem_stats` | Aggregate counts and totals per ecosystem |
+| `upcoming_interventions` | Decisions that need action within 90 days |
+
+### Row Level Security
+
+- **Public (anon)**: Can read open/closing_soon opportunities and published outputs. Can insert submissions.
+- **Authenticated**: Can read all tables. Can insert/update most tables. Profiles are self-managed.
+- All tables have RLS enabled.
+
+### Functions & Triggers
+
+- `update_updated_at()` — Auto-updates `updated_at` on all tables that have it
+- `handle_new_user()` — Auto-creates a profile row when a new auth user signs up
+
+---
+
+## Seed Data (NWA Prototype)
+
+The `seed.sql` file loads a comprehensive demo dataset:
+
+| Entity | Count | Notes |
+|--------|-------|-------|
+| Ecosystems | 1 | Northwest Arkansas |
+| Organizations | 14 | Foundations, institutions, government, corporate, education, nonprofits |
+| Contacts | 20 | Sample contacts with roles and decision-maker flags |
+| Org Relationships | 15 | Funding, partnership, and governance links |
+| Practitioners | 12 | Across disciplines with income, retention, and risk data |
+| Investments | 18 | With compounding chains linked (builds_on_id ↔ led_to_id) |
+| Decisions | 8 | With 4 dependency links between them |
+| Precedents | 7 | Historical cases with lessons and investment links |
+| Opportunities | 12 | 9 open/closing, 3 closed/awarded with investment links |
+| Narratives | 8 | Institutional, media, practitioner, and regional positioning |
+| Outputs | 3 | Directional brief, memory transfer, state-of-ecosystem |
+| Tags | 16 | Sector (7), theme (6), geography (3) |
+| Submissions | 4 | Review queue demo entries |
+| Activity Log | 10 | Recent activity entries |
+
+### UUID Convention
+
+All seed UUIDs follow a predictable pattern for cross-referencing:
+
+| Prefix | Entity |
+|--------|--------|
+| `a0000000-...` | Ecosystems |
+| `b0000000-...-000000000001` through `...0014` | Organizations |
+| `c0000000-...-000000000001` through `...0018` | Investments |
+| `d0000000-...-000000000001` through `...0008` | Decisions |
+| `e0000000-...-000000000001` through `...0003` | Outputs |
+| `f0000000-...-000000000001` through `...0016` | Tags |
+
+---
+
+## Two Surfaces
+
+### Practice Surface (Dark Theme)
+
+Authenticated dashboard at `/(practice)/*`. Dark background (`#141414`), warm text (`#E8E4E0`). Uses Tailwind utility classes referencing CSS custom properties defined in `globals.css`.
+
+Auth: Supabase auth with password + magic link. Middleware redirects unauthenticated users to `/auth/login`.
+
+### Public Surface (Light Theme)
+
+Unauthenticated at `/opportunities`. Light background (`#FAFAF7`), dark text (`#1A1A18`). Uses `.pub-theme` CSS class with dedicated custom properties. No Tailwind dark mode — standalone CSS.
+
+RLS policy allows anon reads of open/closing_soon opportunities.
 
 ---
 
@@ -177,50 +271,35 @@ platform/
 ### Practice Surface (Dark)
 
 ```css
-:root[data-theme="practice"] {
-  --bg-primary: #0F0F0F;
-  --bg-surface: #1A1A1A;
-  --bg-inset: #141414;
-  --border-subtle: #2A2A2A;
+:root {
+  --bg: #141414;
+  --surface: #1A1A1A;
+  --surface-inset: #111111;
+  --border: #2A2A2A;
   --border-medium: #3A3A3A;
-  --text-primary: #E8E8E8;
-  --text-secondary: #999999;
-  --text-tertiary: #666666;
-  --accent-gold: #C4A67A;
+  --text: #E8E4E0;
+  --muted: #999999;
+  --dim: #666666;
+  --accent: #C4A67A;
   --accent-glow: rgba(196, 166, 122, 0.06);
   --status-green: #5B8C5A;
   --status-red: #C45B5B;
   --status-blue: #5B7FC4;
   --status-orange: #C4885B;
   --status-purple: #8B5BC4;
-  --font-serif: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
 }
 ```
 
 ### Public Surface (Light)
 
 ```css
-:root[data-theme="public"] {
-  --bg-primary: #FAFAF7;
-  --bg-surface: #FFFFFF;
-  --bg-inset: #F5F5F0;
-  --border-subtle: #E8E8E3;
-  --border-medium: #D0D0C8;
-  --text-primary: #1A1A18;
-  --text-secondary: #6B6B66;
-  --text-tertiary: #9A9A94;
-  --accent-gold: #C4A67A;
-  --accent-glow: rgba(196, 166, 122, 0.07);
-  --status-green: #2D7D46;
-  --status-red: #C45B5B;
-  --status-blue: #2D5A7D;
-  --status-orange: #C49A5B;
-  --status-purple: #6B2D7D;
-  --font-serif: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+.pub-theme {
+  --pub-bg: #FAFAF7;
+  --pub-surface: #FFFFFF;
+  --pub-border: #E8E8E3;
+  --pub-text: #1A1A18;
+  --pub-muted: #6B6B66;
+  --pub-accent: #C4A67A;
 }
 ```
 
@@ -230,25 +309,45 @@ Same accent gold, same fonts. Different ground and text colors. The practice sur
 
 ## Routing Logic
 
-### Public Surface (`/opportunities`, `/profile`, `/engagements`)
-- No auth required to browse opportunities
+### Public Surface (`/opportunities`, `/submit/*`)
+- No auth required to browse opportunities or submit forms
 - Auth required to: create profile, express interest, access engagement workspace
 - Server-rendered opportunity pages for SEO and shareability
 - Light theme applied via layout
 
-### Practice Surface (`/tools/*`)
+### Practice Surface (`/(practice)/*`)
 - Auth required for all routes
-- Redirect to `/login` if not authenticated
+- Redirect to `/auth/login` if not authenticated
 - Practice team users only (role-gated in production)
 - Dark theme applied via layout
 - Sidebar navigation across all tools
 
 ### Auth Flow
-1. User visits `/login`
+1. User visits `/auth/login`
 2. Creates account or signs in (email + password for demo)
 3. On first login → redirect to `/profile` for profile creation
-4. On subsequent login → redirect to `/opportunities` (or `/tools/dashboard` if practice team)
+4. On subsequent login → redirect to `/opportunities` (or `/dashboard` if practice team)
 5. Session persisted via Supabase cookie
+
+---
+
+## Database Reset Procedure
+
+To nuke and rebuild:
+
+1. Open Supabase Dashboard → SQL Editor
+2. Run `reset.sql` (drops all objects)
+3. Run `schema.sql` (creates everything + minimal seed)
+4. Run `seed.sql` (loads full NWA prototype data)
+
+Verify with:
+```sql
+SELECT COUNT(*) as orgs FROM organizations;
+SELECT COUNT(*) as investments FROM investments;
+SELECT COUNT(*) as opportunities FROM opportunities;
+```
+
+Expected: 14 orgs, 18 investments, 12 opportunities.
 
 ---
 
@@ -277,44 +376,13 @@ Opportunity awarded (practice team or funder records this)
   → Opportunity status updated to 'awarded'
 ```
 
-### Engagement → Investment Feed
-```
-Double confirmation fires on engagement completion
-  → API route /api/engagement-complete
-  → Creates investment record:
-     - initiative_name = engagement.title
-     - amount = engagement.total_amount
-     - source_org_id = engagement.funder_org_id
-     - status = 'completed'
-     - source = 'platform' (distinguishes from manual entries)
-     - compounding = null (practice team assesses later)
-  → Links engagement.investment_id to new investment
-  → Updates opportunity.status to 'awarded' (if linked)
-  → Creates activity log entry
-  → Practice team sees "NEW COMPLETION" prompt on dashboard
-```
-
-### Payment Acceleration (Conditional on Funder Alignment)
-```
-Double confirmation fires
-  → If funder is acceleration-enabled:
-     → Check float fund balance
-     → If sufficient: initiate Stripe payout to practitioner (7 days)
-     → Create float_fund_transaction (acceleration_out)
-     → Invoice funder via platform entity
-     → When funder pays: create float_fund_transaction (funder_replenish)
-  → If funder is not acceleration-enabled:
-     → Standard payment flow (practitioner invoices funder directly)
-     → Platform tracks payment status for visibility
-```
-
 ### Submission Flow
 ```
-Anyone submits via /opportunities/submit
+Anyone submits via /opportunities/submit, /submit/flag, or /submit/practitioner
   → submissions table (status: pending)
-  → Practice team reviews in /tools/submissions
-  → Approved → opportunity created in opportunities table
-  → Appears on public /opportunities surface
+  → Practice team reviews in /submissions
+  → Approved → entity created (opportunity, decision, or practitioner)
+  → Appears in appropriate tool on the practice surface
 ```
 
 ---
@@ -323,7 +391,7 @@ Anyone submits via /opportunities/submit
 
 ### Inline Reference Cards
 Used across both surfaces. A compact card with colored left border indicating entity type:
-- Gold: Investment
+- Gold: Investment / Organization
 - Blue: Decision
 - Green: Opportunity
 - Neutral/gray: Precedent
@@ -340,67 +408,34 @@ Slide-over panel on the right side. Consistent structure per tool:
 4. "Across the Toolkit" — cross-tool connections
 5. Record (created, reviewed, actions)
 
-### Engagement Workspace (Public Surface)
-Centered single-column layout. Sections:
-1. Header (title, parties, amount, dates, status)
-2. Scope
-3. Milestones (checklist)
-4. Deliverables (checklist with file attachment)
-5. Payment (terms with status tracking)
-6. Activity log (reverse chronological)
-
-### Summary Line Pattern
-Used on public opportunities page and practice dashboard:
-"9 open opportunities totaling $200,500 from 7 sources"
-Numbers in mono bold. Words in body font. Dynamically computed. Updates with filters.
-
 ### Editorial Stats Pattern
-Used on practice surface (dashboard, investment list):
-"6 investments totaling $3.6M tracked across 6 organizations. 3 are compounding. 2 are not. The lowest allocation: Sector Development at 2.9% of total."
+Used on practice surface (dashboard, investment list, outputs, submissions):
+"6 investments totaling $3.6M tracked across 6 organizations. 3 are compounding. 2 are not."
 Sentence format, not stat cards.
 
 ---
 
 ## Build Phases
 
-### Phase 1: Foundation + Public Surface (Now)
+### Phase 1: Foundation + Public Surface (Complete)
 - Database schema deployment
 - Auth setup
 - Public opportunities page (card grid, filters, summary)
-- Opportunity detail page (with prep context + funder info)
-- Practitioner profiles (create, edit, view)
 - Opportunity submission form
-- Practice surface layout + dashboard (existing, refined)
+- Practice surface layout + dashboard
 
-### Phase 2: Context Layer
-- Preparation context written for each opportunity
-- "About this funder" section on opportunity detail
-- Practitioner verification fields
-- "Verified" badge on profiles
-- Interest signals + aggregate display in practice surface
+### Phase 2: Practice Tools Redesign (Complete)
+- Narratives: editorial stats, gap-coded cards, cross-tool detail panel
+- Outputs: delivery tracking, creation workflow, reference browser, document upload
+- Submissions: 3-tab review queue, ecosystem matching, public forms
 
-### Phase 3: Engagement Loop + Payment (Conditional)
+### Phase 3: Engagement Loop (Future)
 - Engagement workspace (milestones, deliverables, activity)
 - Completion confirmation flow
 - Engagement → investment auto-creation
-- Profile update on engagement completion
-- Funder interface (lightweight — or practice team acts as proxy)
-- Payment acceleration (if funder says yes to payment routing)
-- Float fund tracking
+- Funder interface
 
-### Phase 4: Expanded Workforce
+### Phase 4: Expanded Workforce (Future)
 - Availability calendar on profiles
 - Day-rate display
 - Quick-book flow for short engagements
-- Simplified workspace for day-rate work
-
----
-
-## What This Doesn't Cover
-
-- Mobile native app (web-first, responsive)
-- AI-powered opportunity matching (future — profile-based recommendations)
-- Multi-ecosystem support (schema supports it via ecosystem_id, UI deferred)
-- Automated payment processing for funders that don't support routing
-- Legal contract generation (the engagement template is operational, not legal)
-- Practitioner survey/census flow (separate from profile creation)

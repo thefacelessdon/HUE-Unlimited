@@ -17,7 +17,7 @@ export default async function PracticeLayout({
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface text-text">
       <Sidebar />
       <main className="ml-60">
         {/* Header bar */}

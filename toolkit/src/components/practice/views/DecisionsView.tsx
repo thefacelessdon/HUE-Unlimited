@@ -731,6 +731,12 @@ export function DecisionsView({
                 <p className="text-[13px] text-text leading-relaxed bg-surface-inset rounded-md px-4 py-3 border-l-2 border-status-orange">
                   {selected.intervention_needed}
                 </p>
+                <button
+                  onClick={() => navigateTo(`/outputs?create_for_decision=${selected.id}`)}
+                  className="mt-3 px-4 py-2 text-[13px] font-medium text-bg bg-text rounded hover:opacity-90 transition-opacity inline-flex items-center gap-1.5"
+                >
+                  Draft output for this decision →
+                </button>
               </DetailSection>
             )}
 

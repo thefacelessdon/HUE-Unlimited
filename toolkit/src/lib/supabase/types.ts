@@ -237,10 +237,13 @@ export interface Narrative {
   gap: GapLevel;
   evidence_notes: string | null;
   source_url: string | null;
+  significance: string | null;
   last_reviewed_at: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export type DeliveryStatus = 'draft' | 'published' | 'delivered' | 'acknowledged';
 
 export interface Output {
   id: string;
@@ -254,8 +257,22 @@ export interface Output {
   triggered_by_decision_id: string | null;
   is_published: boolean;
   published_at: string | null;
+  delivery_status: DeliveryStatus;
+  delivered_at: string | null;
+  delivered_to_contact: string | null;
+  delivery_notes: string | null;
+  file_url: string | null;
+  file_type: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface OutputReference {
+  id: string;
+  output_id: string;
+  reference_type: string;
+  reference_id: string;
+  context_note: string | null;
 }
 
 export interface Submission {
@@ -296,6 +313,106 @@ export interface DecisionDependency {
   decision_id: string;
   depends_on_id: string;
   description: string | null;
+}
+
+// ─── Public surface types ────────────────────────────
+
+export type Availability = 'available' | 'booked' | 'selective';
+export type EngagementStatus = 'pending' | 'active' | 'complete' | 'cancelled';
+
+export interface PublicProfile {
+  id: string;
+  user_id: string | null;
+  name: string;
+  email: string;
+  primary_skill: string;
+  location: string;
+  bio: string | null;
+  portfolio_url: string | null;
+  additional_skills: string[] | null;
+  rate_range: string | null;
+  availability: Availability;
+  looking_for: string[] | null;
+  business_entity_type: string | null;
+  is_verified: boolean;
+  verified_at: string | null;
+  practitioner_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type InterestStatus = 'expressed' | 'applied' | 'awarded' | 'not_awarded' | 'withdrew' | 'did_not_apply';
+
+export interface OpportunityInterest {
+  id: string;
+  opportunity_id: string;
+  profile_id: string | null;
+  practitioner_name: string | null;
+  practitioner_email: string | null;
+  practitioner_discipline: string | null;
+  notes: string | null;
+  status: InterestStatus;
+  followed_up_at: string | null;
+  followup_response: Record<string, unknown> | null;
+  outcome_notes: string | null;
+  practitioner_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Engagement {
+  id: string;
+  opportunity_id: string | null;
+  profile_id: string;
+  funder_org_id: string | null;
+  funder_contact_email: string | null;
+  title: string;
+  scope: string | null;
+  total_amount: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  payment_terms: Record<string, unknown>[];
+  status: EngagementStatus;
+  practitioner_confirmed_complete: boolean;
+  funder_confirmed_complete: boolean;
+  completed_at: string | null;
+  payment_accelerated: boolean;
+  accelerated_payment_date: string | null;
+  funder_payment_received_date: string | null;
+  investment_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EngagementMilestone {
+  id: string;
+  engagement_id: string;
+  title: string;
+  due_date: string | null;
+  completed_at: string | null;
+  confirmed_at: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface EngagementDeliverable {
+  id: string;
+  engagement_id: string;
+  title: string;
+  file_url: string | null;
+  submitted_at: string | null;
+  accepted_at: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface EngagementActivity {
+  id: string;
+  engagement_id: string;
+  actor: string;
+  action: string;
+  detail: string | null;
+  created_at: string;
 }
 
 // ─── View types ──────────────────────────────────────
@@ -353,9 +470,16 @@ export interface Database {
       opportunities: { Row: Opportunity; Insert: Partial<Opportunity>; Update: Partial<Opportunity> };
       narratives: { Row: Narrative; Insert: Partial<Narrative>; Update: Partial<Narrative> };
       outputs: { Row: Output; Insert: Partial<Output>; Update: Partial<Output> };
+      output_references: { Row: OutputReference; Insert: Partial<OutputReference>; Update: Partial<OutputReference> };
       submissions: { Row: Submission; Insert: Partial<Submission>; Update: Partial<Submission> };
       activity_log: { Row: ActivityLog; Insert: Partial<ActivityLog>; Update: Partial<ActivityLog> };
       tags: { Row: Tag; Insert: Partial<Tag>; Update: Partial<Tag> };
+      public_profiles: { Row: PublicProfile; Insert: Partial<PublicProfile>; Update: Partial<PublicProfile> };
+      opportunity_interests: { Row: OpportunityInterest; Insert: Partial<OpportunityInterest>; Update: Partial<OpportunityInterest> };
+      engagements: { Row: Engagement; Insert: Partial<Engagement>; Update: Partial<Engagement> };
+      engagement_milestones: { Row: EngagementMilestone; Insert: Partial<EngagementMilestone>; Update: Partial<EngagementMilestone> };
+      engagement_deliverables: { Row: EngagementDeliverable; Insert: Partial<EngagementDeliverable>; Update: Partial<EngagementDeliverable> };
+      engagement_activity: { Row: EngagementActivity; Insert: Partial<EngagementActivity>; Update: Partial<EngagementActivity> };
     };
     Views: {
       stale_entries: { Row: StaleEntry };
