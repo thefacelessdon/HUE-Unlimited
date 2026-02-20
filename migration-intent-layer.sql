@@ -34,6 +34,7 @@ CREATE INDEX IF NOT EXISTS idx_interests_email ON opportunity_interests(practiti
 
 -- Allow anonymous inserts for the intent form (public, no auth)
 DROP POLICY IF EXISTS "Users can insert own interests" ON opportunity_interests;
+DROP POLICY IF EXISTS "Anyone can insert interests" ON opportunity_interests;
 CREATE POLICY "Anyone can insert interests" ON opportunity_interests
   FOR INSERT WITH CHECK (true);
 
