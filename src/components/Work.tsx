@@ -1,23 +1,29 @@
+import Link from "next/link";
+
 const projects = [
   {
-    title: "Lumina Rebrand",
-    category: "Brand Identity",
+    title: "Frequency Campaign",
+    category: "Case Study",
     color: "from-hue-600 to-pink-500",
+    href: "/case-studies",
   },
   {
-    title: "Vertex Digital Platform",
-    category: "Web Design & Dev",
+    title: "Film Archive",
+    category: "Analog Photography",
     color: "from-pink-500 to-orange-500",
+    href: "/film-archive",
   },
   {
-    title: "Nova Campaign",
-    category: "Creative Strategy",
+    title: "Polaroid Archives",
+    category: "Portrait Collection",
     color: "from-orange-500 to-yellow-500",
+    href: "/polaroid-archives",
   },
   {
-    title: "Drift Motion Reel",
+    title: "Coming Soon",
     category: "Motion Design",
     color: "from-hue-500 to-blue-500",
+    href: "#",
   },
 ];
 
@@ -40,8 +46,9 @@ export default function Work() {
 
         <div className="grid gap-6 md:grid-cols-2">
           {projects.map((project) => (
-            <div
+            <Link
               key={project.title}
+              href={project.href}
               className="group relative overflow-hidden rounded-2xl"
             >
               {/* Gradient placeholder for project image */}
@@ -56,7 +63,7 @@ export default function Work() {
                   {project.title}
                 </h3>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
