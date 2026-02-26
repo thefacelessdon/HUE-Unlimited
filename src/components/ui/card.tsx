@@ -1,0 +1,17 @@
+import { forwardRef, HTMLAttributes } from "react";
+
+const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className = "", children, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={`rounded-2xl border border-white/10 bg-white/[0.02] ${className}`}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+);
+
+Card.displayName = "Card";
+
+export { Card };
