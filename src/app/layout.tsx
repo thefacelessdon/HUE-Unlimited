@@ -4,10 +4,16 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "HUE Unlimited | Creative Agency",
+  title: "HUE Unlimited | Embedded Creative Studio",
   description:
-    "HUE Unlimited is a creative agency that brings bold ideas to life through design, branding, and digital experiences.",
-  keywords: ["creative agency", "branding", "design", "digital", "HUE Unlimited"],
+    "The embedded creative partner for brands that produce at volume. Spotify. Disney. Red Bull. Death Row Records. 250M+ video views. Six global regions.",
+  keywords: [
+    "embedded creative studio",
+    "brand campaigns",
+    "creative direction",
+    "content production",
+    "HUE Unlimited",
+  ],
 };
 
 export default function RootLayout({
@@ -17,7 +23,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans">
+      <body>
+        <div className="grain-overlay" aria-hidden="true" />
         <Navbar />
         <main>{children}</main>
         <Footer />
