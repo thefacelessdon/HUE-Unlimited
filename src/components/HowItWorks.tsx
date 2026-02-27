@@ -1,6 +1,6 @@
 export default function HowItWorks() {
   return (
-    <section className="reveal px-6 py-24 md:px-12 md:py-28 lg:px-12">
+    <section id="how-it-works" className="reveal px-6 py-24 md:px-12 md:py-28 lg:px-12">
       <div className="mx-auto max-w-site">
         <p className="section-label mb-8">How It Works</p>
         <h2 className="display-text mb-16 text-[clamp(36px,5vw,72px)] text-white">

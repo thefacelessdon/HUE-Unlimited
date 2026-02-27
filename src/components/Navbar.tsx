@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const navLinks = [
   { label: "Work", href: "/#work" },
-  { label: "Services", href: "/#services" },
+  { label: "Services", href: "/#what-we-do" },
   { label: "Systems", href: "/#systems" },
   { label: "Archives", href: "/archives" },
 ];
@@ -26,7 +26,7 @@ export default function Navbar() {
   return (
     <header
       ref={headerRef}
-      className="fixed top-0 z-50 w-full transition-all duration-300"
+      className="fixed top-0 z-[200] w-full transition-all duration-300"
       style={{
         borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
         background: scrolled ? "rgba(0,0,0,0.92)" : "transparent",

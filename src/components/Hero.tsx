@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Hero with darkroom type development.
@@ -19,9 +22,9 @@ export default function Hero() {
     const turb = turbRef.current;
     if (!turb) return;
 
-    // Start with heavy grain
     turb.setAttribute("baseFrequency", "0.08");
 
+    const ctx = gsap.context(() => {
     const tl = gsap.timeline({ delay: 0.15 });
 
     // Animate filter: grain dissolves over 1.4s
@@ -75,9 +78,20 @@ export default function Hero() {
       1.2
     );
 
-    return () => {
-      tl.kill();
-    };
+    // Parallax: headline drifts up as hero exits viewport
+    gsap.to("#hero-headline-container", {
+      y: -60,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+      },
+    });
+    }); // end gsap.context
+
+    return () => ctx.revert();
   }, []);
 
   const lines = [
@@ -89,7 +103,7 @@ export default function Hero() {
   ];
 
   return (
-    <section className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden px-6 pb-8 pt-24 md:min-h-screen md:pb-12 md:px-12 lg:px-12">
+    <section id="hero" className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden px-6 pb-8 pt-24 md:min-h-screen md:pb-12 md:px-12 lg:px-12">
       {/* SVG filter for grain/noise effect */}
       <svg className="absolute h-0 w-0" aria-hidden="true">
         <defs>
