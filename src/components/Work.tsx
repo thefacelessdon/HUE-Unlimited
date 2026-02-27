@@ -207,7 +207,7 @@ function SprocketStrip() {
 }
 
 export default function Work() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const [ready, setReady] = useState(false);
@@ -221,29 +221,30 @@ export default function Work() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // GSAP horizontal scroll — desktop only
+  // Horizontal scroll via sticky + GSAP (no pin — avoids spacer/black-gap issues)
   useEffect(() => {
     if (isMobile || !ready) return;
-    const section = sectionRef.current;
+    const wrapper = wrapperRef.current;
     const track = trackRef.current;
-    if (!section || !track) return;
+    if (!wrapper || !track) return;
 
     // Wait a frame for layout to settle
     const raf = requestAnimationFrame(() => {
-      const scrollAmount = track.scrollWidth - window.innerWidth;
-      if (scrollAmount <= 0) return;
+      const scrollDistance = track.scrollWidth - window.innerWidth;
+      if (scrollDistance <= 0) return;
+
+      // Wrapper height = one viewport (sticky container) + scroll distance
+      wrapper.style.height = `${window.innerHeight + scrollDistance}px`;
 
       const ctx = gsap.context(() => {
         gsap.to(track, {
-          x: -scrollAmount,
+          x: -scrollDistance,
           ease: "none",
           scrollTrigger: {
-            trigger: section,
+            trigger: wrapper,
             start: "top top",
-            end: `+=${scrollAmount}`,
-            pin: true,
+            end: "bottom bottom",
             scrub: 0.6,
-            anticipatePin: 1,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
               if (counterRef.current) {
@@ -256,16 +257,17 @@ export default function Work() {
             },
           },
         });
-      }, section);
+      }, wrapper);
 
-      // Store cleanup on the section for the effect teardown
-      (section as HTMLElement & { _gsapCtx?: gsap.Context })._gsapCtx = ctx;
+      (wrapper as HTMLDivElement & { _gsapCtx?: gsap.Context })._gsapCtx = ctx;
     });
 
     return () => {
       cancelAnimationFrame(raf);
-      const ctx = (sectionRef.current as HTMLElement & { _gsapCtx?: gsap.Context } | null)?._gsapCtx;
+      const w = wrapperRef.current;
+      const ctx = (w as HTMLDivElement & { _gsapCtx?: gsap.Context } | null)?._gsapCtx;
       ctx?.revert();
+      if (w) w.style.height = "";
     };
   }, [isMobile, ready]);
 
@@ -305,76 +307,75 @@ export default function Work() {
     );
   }
 
-  /* ── Desktop: horizontal GSAP scroll ── */
+  /* ── Desktop: horizontal scroll via sticky (no GSAP pin) ── */
   return (
-    <section
-      id="work"
-      ref={sectionRef}
-      className="relative flex h-screen flex-col justify-center overflow-hidden"
-    >
-      {/* Header */}
-      <div className="flex shrink-0 items-end justify-between px-6 pb-6 md:px-12 lg:px-12">
-        <div>
-          <p className="section-label mb-4">The Work</p>
-          <h2 className="display-text text-[clamp(36px,5vw,64px)] text-white">
-            SELECTED PROJECTS
-          </h2>
+    <div id="work" ref={wrapperRef} className="relative">
+      {/* Sticky container stays in view while wrapper scrolls */}
+      <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden bg-black">
+        {/* Header */}
+        <div className="flex shrink-0 items-end justify-between px-6 pb-6 md:px-12 lg:px-12">
+          <div>
+            <p className="section-label mb-4">The Work</p>
+            <h2 className="display-text text-[clamp(36px,5vw,64px)] text-white">
+              SELECTED PROJECTS
+            </h2>
+          </div>
+          <div className="flex items-center gap-6">
+            <span
+              ref={counterRef}
+              className="font-mono text-[11px] font-light uppercase tracking-[0.14em]"
+              style={{ color: "var(--muted)" }}
+            >
+              01 / {String(workCards.length).padStart(2, "0")}
+            </span>
+            <span
+              className="font-mono text-[10px] font-light uppercase tracking-[0.14em]"
+              style={{ color: "var(--muted)" }}
+            >
+              Scroll →
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-6">
-          <span
-            ref={counterRef}
-            className="font-mono text-[11px] font-light uppercase tracking-[0.14em]"
-            style={{ color: "var(--muted)" }}
-          >
-            01 / {String(workCards.length).padStart(2, "0")}
-          </span>
-          <span
-            className="font-mono text-[10px] font-light uppercase tracking-[0.14em]"
-            style={{ color: "var(--muted)" }}
-          >
-            Scroll →
-          </span>
-        </div>
-      </div>
 
-      {/* Top sprocket holes */}
-      <SprocketStrip />
+        {/* Top sprocket holes */}
+        <SprocketStrip />
 
-      {/* Horizontal scroll track */}
-      <div
-        ref={trackRef}
-        className="flex shrink-0 items-stretch gap-4 px-6 py-4 md:px-12"
-        style={{ willChange: "transform" }}
-      >
-        {workCards.map((card) => (
-          <WorkCardComponent key={card.id} card={card} />
-        ))}
-        {/* End card — CTA */}
+        {/* Horizontal scroll track */}
         <div
-          className="flex flex-shrink-0 flex-col items-center justify-center border p-8"
-          style={{
-            borderColor: "var(--border)",
-            background: "#000",
-            width: "520px",
-            height: "480px",
-          }}
+          ref={trackRef}
+          className="flex shrink-0 items-stretch gap-4 px-6 py-4 md:px-12"
+          style={{ willChange: "transform" }}
         >
-          <span className="display-text text-outline-yellow mb-6 text-center text-[clamp(24px,4vw,48px)]">
-            SEE ALL
-            <br />
-            WORK →
-          </span>
-          <span
-            className="font-mono text-[10px] font-light uppercase tracking-[0.14em]"
-            style={{ color: "var(--muted)" }}
+          {workCards.map((card) => (
+            <WorkCardComponent key={card.id} card={card} />
+          ))}
+          {/* End card — CTA */}
+          <div
+            className="flex flex-shrink-0 flex-col items-center justify-center border p-8"
+            style={{
+              borderColor: "var(--border)",
+              background: "#000",
+              width: "520px",
+              height: "480px",
+            }}
           >
-            View full portfolio
-          </span>
+            <span className="display-text text-outline-yellow mb-6 text-center text-[clamp(24px,4vw,48px)]">
+              SEE ALL
+              <br />
+              WORK →
+            </span>
+            <span
+              className="font-mono text-[10px] font-light uppercase tracking-[0.14em]"
+              style={{ color: "var(--muted)" }}
+            >
+              View full portfolio
+            </span>
+          </div>
         </div>
-      </div>
 
-      {/* Bottom sprocket holes */}
-      <SprocketStrip />
-    </section>
+        {/* Bottom sprocket holes */}
+        <SprocketStrip />
+      </div>
+    </div>
   );
 }
