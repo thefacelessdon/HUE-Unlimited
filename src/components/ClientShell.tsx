@@ -2,6 +2,7 @@
 
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import CustomCursor from "@/components/CustomCursor";
+import PageTransition from "@/components/PageTransition";
 
 export default function ClientShell({
   children,
@@ -13,7 +14,7 @@ export default function ClientShell({
   return (
     <>
       <CustomCursor />
-      {children}
+      <PageTransition>{children}</PageTransition>
     </>
   );
 }

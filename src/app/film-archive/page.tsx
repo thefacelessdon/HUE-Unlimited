@@ -34,7 +34,7 @@ const filmMedia = [
 
 export default function FilmArchive() {
   return (
-    <div className="min-h-screen pt-20">
+    <div className="min-h-screen pt-24">
       <FilmStrip media={filmMedia} />
     </div>
   );
