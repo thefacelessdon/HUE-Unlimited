@@ -23,7 +23,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative flex min-h-screen flex-col justify-between overflow-hidden px-6 pb-12 pt-28 md:px-12 lg:px-12">
+    <section className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden px-6 pb-8 pt-24 md:min-h-screen md:pb-12 md:px-12 lg:px-12">
       {/* Gradient bloom — bottom 25% */}
       <div
         className="gradient-pulse pointer-events-none absolute bottom-0 left-0 right-0 h-[50vh]"

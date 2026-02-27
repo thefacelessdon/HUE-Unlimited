@@ -63,11 +63,11 @@ export function CaseStudyLayout({ data }: { data: CaseStudyData }) {
       {/* Stats bar */}
       <section className="px-6 py-16 md:px-12 lg:px-12">
         <div className="mx-auto max-w-site">
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {data.stats.map((stat) => (
               <div
                 key={stat.label}
-                className="border p-6"
+                className="border p-4 md:p-6"
                 style={{ borderColor: "var(--border)" }}
               >
                 <div

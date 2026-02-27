@@ -61,15 +61,8 @@ export default function Services() {
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span
-                  className="font-body text-[15px] font-light transition-colors duration-200"
+                <span className="font-body text-[14px] font-light transition-colors duration-200 group-hover:text-white md:text-[15px]"
                   style={{ color: "rgba(255,255,255,0.6)" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#fff")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "rgba(255,255,255,0.6)")
-                  }
                 >
                   {service}
                 </span>

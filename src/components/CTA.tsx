@@ -36,11 +36,11 @@ export default function CTA() {
           know from the first conversation.
         </p>
 
-        <div className="flex flex-wrap gap-4">
-          <Link href="mailto:creative@hueunlimited.com" className="btn-primary">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+          <Link href="mailto:creative@hueunlimited.com" className="btn-primary text-center">
             Start a conversation →
           </Link>
-          <Link href="#work" className="btn-ghost">
+          <Link href="#work" className="btn-ghost text-center">
             See the work first
           </Link>
         </div>

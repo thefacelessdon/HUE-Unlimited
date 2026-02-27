@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -79,66 +79,65 @@ const workCards: WorkCard[] = [
   },
 ];
 
-function WorkCardComponent({ card }: { card: WorkCard }) {
+function WorkCardComponent({
+  card,
+  vertical,
+}: {
+  card: WorkCard;
+  vertical?: boolean;
+}) {
   const inner = (
     <div
-      className="work-card group relative flex h-full flex-col justify-end overflow-hidden border p-6 transition-colors duration-300 hover:border-white/20 md:p-8"
+      className="work-card group relative flex flex-col justify-end overflow-hidden border p-6 transition-colors duration-300 hover:border-white/20 md:p-8"
       style={{
         borderColor: "var(--border)",
         background: "#000",
-        width: "min(520px, 80vw)",
-        minHeight: "480px",
+        width: vertical ? "100%" : "min(520px, 80vw)",
+        minHeight: vertical ? "340px" : "480px",
       }}
     >
-      {/* Background gradient */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{ background: card.bgGradient }}
         aria-hidden="true"
       />
 
-      {/* Watermark */}
       <span
-        className="pointer-events-none absolute right-4 top-4 display-text select-none text-[clamp(48px,8vw,100px)] text-white"
+        className="pointer-events-none absolute right-4 top-4 display-text select-none text-[clamp(36px,8vw,100px)] text-white"
         style={{ opacity: 0.06 }}
         aria-hidden="true"
       >
         {card.watermark}
       </span>
 
-      {/* Film frame label */}
       <div
-        className="absolute left-6 top-6 font-mono text-[9px] font-light uppercase tracking-[0.16em] md:left-8 md:top-8"
+        className="absolute left-6 top-6 font-mono text-[8px] font-light uppercase tracking-[0.16em] md:left-8 md:top-8 md:text-[9px]"
         style={{ color: "var(--muted)" }}
       >
         ► {card.id} HUE ARCHIVA 400 [{card.client.toUpperCase()}]
       </div>
 
-      {/* Content */}
       <div className="relative z-10">
         <span
-          className="mb-3 inline-block font-mono text-[9px] font-light uppercase tracking-[0.14em]"
+          className="mb-2 inline-block font-mono text-[8px] font-light uppercase tracking-[0.14em] md:mb-3 md:text-[9px]"
           style={{ color: "var(--yellow)" }}
         >
           {card.pill}
         </span>
-
-        <h3 className="display-text mb-4 text-[clamp(20px,3vw,32px)] text-white">
+        <h3 className="display-text mb-3 text-[clamp(18px,3vw,32px)] text-white md:mb-4">
           {card.title}
         </h3>
-
         <p
-          className="mb-4 font-mono text-[10px] font-light uppercase tracking-[0.12em]"
+          className="mb-3 font-mono text-[9px] font-light uppercase tracking-[0.12em] md:mb-4 md:text-[10px]"
           style={{ color: "var(--muted)" }}
         >
           {card.stats}
         </p>
-
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5 md:gap-2">
           {card.tags.map((tag) => (
             <span
               key={tag}
-              className="border px-3 py-1 font-mono text-[9px] font-light uppercase tracking-[0.10em]"
+              className="border px-2 py-0.5 font-mono text-[8px] font-light uppercase tracking-[0.10em] md:px-3 md:py-1 md:text-[9px]"
               style={{
                 borderColor: "var(--border)",
                 color: "rgba(255,255,255,0.5)",
@@ -154,29 +153,40 @@ function WorkCardComponent({ card }: { card: WorkCard }) {
 
   if (card.href) {
     return (
-      <Link href={card.href} className="block flex-shrink-0">
+      <Link
+        href={card.href}
+        className={`block ${vertical ? "" : "flex-shrink-0"}`}
+      >
         {inner}
       </Link>
     );
   }
-  return <div className="flex-shrink-0">{inner}</div>;
+  return <div className={vertical ? "" : "flex-shrink-0"}>{inner}</div>;
 }
 
 export default function Work() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
     const section = sectionRef.current;
     const track = trackRef.current;
     if (!section || !track) return;
 
-    // Calculate how far to scroll horizontally
     const getScrollAmount = () => track.scrollWidth - window.innerWidth;
 
     const ctx = gsap.context(() => {
-      const tween = gsap.to(track, {
+      gsap.to(track, {
         x: () => -getScrollAmount(),
         ease: "none",
         scrollTrigger: {
@@ -197,15 +207,36 @@ export default function Work() {
           },
         },
       });
-
-      return () => {
-        tween.kill();
-      };
     }, section);
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile]);
 
+  /* ── Mobile: vertical stack ── */
+  if (isMobile) {
+    return (
+      <section id="work" className="px-6 py-20">
+        <p className="section-label mb-4">The Work</p>
+        <h2 className="display-text mb-8 text-[28px] text-white">
+          SELECTED
+          <br />
+          PROJECTS
+        </h2>
+        <div className="flex flex-col gap-4">
+          {workCards.map((card) => (
+            <WorkCardComponent key={card.id} card={card} vertical />
+          ))}
+        </div>
+        <div className="mt-10 text-center">
+          <span className="display-text text-outline-yellow text-[24px]">
+            SEE ALL WORK →
+          </span>
+        </div>
+      </section>
+    );
+  }
+
+  /* ── Desktop: horizontal GSAP scroll ── */
   return (
     <section
       id="work"
@@ -213,7 +244,6 @@ export default function Work() {
       className="relative overflow-hidden"
       style={{ minHeight: "100vh" }}
     >
-      {/* Header pinned inside section */}
       <div className="flex items-end justify-between px-6 pb-8 pt-24 md:px-12 lg:px-12">
         <div>
           <p className="section-label mb-4">The Work</p>
@@ -221,7 +251,7 @@ export default function Work() {
             SELECTED PROJECTS
           </h2>
         </div>
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="flex items-center gap-6">
           <span
             ref={counterRef}
             className="font-mono text-[11px] font-light uppercase tracking-[0.14em]"
@@ -238,11 +268,7 @@ export default function Work() {
         </div>
       </div>
 
-      {/* Film strip top perforation */}
-      <div
-        className="mx-6 mb-4 flex gap-2 md:mx-12"
-        aria-hidden="true"
-      >
+      <div className="mx-6 mb-4 flex gap-2 md:mx-12" aria-hidden="true">
         {Array.from({ length: 60 }).map((_, i) => (
           <div
             key={i}
@@ -252,7 +278,6 @@ export default function Work() {
         ))}
       </div>
 
-      {/* Horizontal scroll track */}
       <div
         ref={trackRef}
         className="flex gap-4 px-6 md:px-12"
@@ -261,8 +286,6 @@ export default function Work() {
         {workCards.map((card) => (
           <WorkCardComponent key={card.id} card={card} />
         ))}
-
-        {/* End card — CTA */}
         <div
           className="flex flex-shrink-0 flex-col items-center justify-center border p-8"
           style={{
@@ -286,11 +309,7 @@ export default function Work() {
         </div>
       </div>
 
-      {/* Film strip bottom perforation */}
-      <div
-        className="mx-6 mt-4 flex gap-2 md:mx-12"
-        aria-hidden="true"
-      >
+      <div className="mx-6 mt-4 flex gap-2 md:mx-12" aria-hidden="true">
         {Array.from({ length: 60 }).map((_, i) => (
           <div
             key={i}

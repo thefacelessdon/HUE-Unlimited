@@ -38,7 +38,7 @@ export default function Footer() {
           <div className="flex flex-wrap items-center gap-6">
             <a
               href="mailto:creative@hueunlimited.com"
-              className="font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-200 hover:text-white"
+              className="font-mono text-[9px] uppercase tracking-[0.12em] transition-colors duration-200 hover:text-white md:text-[10px] md:tracking-[0.14em]"
               style={{ color: "var(--muted)" }}
             >
               creative@hueunlimited.com

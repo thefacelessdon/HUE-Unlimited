@@ -74,12 +74,21 @@
 
   /* Outlined text variants */
   .text-outline-white {
-    -webkit-text-stroke: 1.5px #fff;
+    -webkit-text-stroke: 1px #fff;
     color: transparent;
   }
   .text-outline-yellow {
-    -webkit-text-stroke: 1.5px #ffff00;
+    -webkit-text-stroke: 1px #ffff00;
     color: transparent;
+  }
+
+  @media (min-width: 768px) {
+    .text-outline-white {
+      -webkit-text-stroke: 1.5px #fff;
+    }
+    .text-outline-yellow {
+      -webkit-text-stroke: 1.5px #ffff00;
+    }
   }
 
   /* Body text muted */
@@ -186,6 +195,22 @@
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ─── Scrollbar hide ─── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Mobile safe area ─── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 /* ─── Reduced Motion ─── */

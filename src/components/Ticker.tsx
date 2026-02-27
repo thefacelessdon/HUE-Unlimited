@@ -13,28 +13,28 @@ const items = [
 ];
 
 export default function Ticker() {
-  const track = items.map((item) => (
-    <span
-      key={item}
-      className="whitespace-nowrap font-mono text-[11px] font-light uppercase tracking-[0.16em]"
-      style={{ color: "var(--muted)" }}
-    >
-      {item}
-      <span className="mx-6 inline-block" style={{ color: "var(--yellow)" }}>
-        ·
+  const renderItems = (prefix: string) =>
+    items.map((item) => (
+      <span
+        key={`${prefix}-${item}`}
+        className="whitespace-nowrap font-mono text-[10px] font-light uppercase tracking-[0.16em] md:text-[11px]"
+        style={{ color: "var(--muted)" }}
+      >
+        {item}
+        <span className="mx-4 inline-block md:mx-6" style={{ color: "var(--yellow)" }}>
+          ·
+        </span>
       </span>
-    </span>
-  ));
+    ));
 
   return (
     <div
-      className="overflow-hidden border-y py-5"
+      className="overflow-hidden border-y py-4 md:py-5"
       style={{ borderColor: "var(--border)" }}
     >
       <div className="ticker-track flex w-max">
-        {track}
-        {/* Duplicate for seamless loop */}
-        {track}
+        {renderItems("a")}
+        {renderItems("b")}
       </div>
     </div>
   );
