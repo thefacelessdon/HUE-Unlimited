@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 const navLinks = [
@@ -12,19 +12,30 @@ const navLinks = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <header
-      className="fixed top-0 z-50 w-full border-b"
+      ref={headerRef}
+      className="fixed top-0 z-50 w-full transition-all duration-300"
       style={{
-        borderColor: "var(--border)",
-        background: "rgba(0,0,0,0.85)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+        borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
+        background: scrolled ? "rgba(0,0,0,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
       }}
     >
       <nav className="mx-auto flex max-w-site items-center justify-between px-6 py-4 lg:px-12">
-        {/* Logo — text placeholder until SVG is supplied */}
+        {/* Logo */}
         <Link
           href="/"
           className="font-display text-[18px] font-extrabold uppercase tracking-[0.04em] text-white"
@@ -39,7 +50,7 @@ export default function Navbar() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-200"
+                className="nav-link font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-200"
                 style={{ color: "var(--muted)" }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.color = "var(--white)")

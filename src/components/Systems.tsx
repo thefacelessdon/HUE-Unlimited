@@ -151,7 +151,7 @@ export default function Systems() {
   return (
     <section
       id="systems"
-      className="px-6 py-24 md:px-12 md:py-28 lg:px-12"
+      className="reveal px-6 py-24 md:px-12 md:py-28 lg:px-12"
     >
       <div className="mx-auto max-w-site">
         {/* Header */}

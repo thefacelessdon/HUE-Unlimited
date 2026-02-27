@@ -13,7 +13,7 @@ const services = [
 
 export default function Services() {
   return (
-    <section id="services" className="px-6 py-24 md:px-12 md:py-28 lg:px-12">
+    <section id="services" className="reveal px-6 py-24 md:px-12 md:py-28 lg:px-12">
       <div className="mx-auto max-w-site">
         <div className="grid gap-16 lg:grid-cols-2">
           {/* Left column */}

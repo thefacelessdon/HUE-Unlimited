@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ClientShell from "@/components/ClientShell";
 
 export const metadata: Metadata = {
   title: "HUE Unlimited | Embedded Creative Studio",
@@ -25,9 +26,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <div className="grain-overlay" aria-hidden="true" />
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        <ClientShell>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+        </ClientShell>
       </body>
     </html>
   );
