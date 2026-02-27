@@ -2,26 +2,228 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Roboto:wght@300;400&display=swap');
+
+/* ─── CSS Custom Properties ─── */
+:root {
+  --black: #000000;
+  --white: #ffffff;
+  --yellow: #ffff00;
+  --red: #ff0000;
+  --blue: #0000ff;
+  --muted: rgba(255, 255, 255, 0.36);
+  --border: rgba(255, 255, 255, 0.09);
+  --dim: rgba(255, 255, 255, 0.07);
+  --body-text: rgba(255, 255, 255, 0.50);
+}
+
+/* ─── Base ─── */
 @layer base {
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-neutral-950 text-white antialiased;
+    background: var(--black);
+    color: var(--white);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: rgba(255, 255, 0, 0.25);
+    color: #fff;
   }
 }
 
+/* ─── Component Classes ─── */
 @layer components {
-  .section-padding {
-    @apply px-6 py-24 md:px-12 lg:px-24;
+  /* Section label: yellow bar + uppercase roboto */
+  .section-label {
+    font-family: "Roboto", system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--yellow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::before {
+    content: "";
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--yellow);
   }
 
-  .gradient-text {
-    @apply bg-gradient-to-r from-hue-400 via-pink-400 to-orange-400 bg-clip-text text-transparent;
+  /* Display type — Montserrat ExtraBold */
+  .display-text {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 0.90;
   }
 
-  .gradient-border {
-    @apply relative before:absolute before:inset-0 before:rounded-2xl before:p-[1px] before:bg-gradient-to-r before:from-hue-500 before:via-pink-500 before:to-orange-500 before:content-[''];
+  /* Outlined text variants */
+  .text-outline-white {
+    -webkit-text-stroke: 1px #fff;
+    color: transparent;
+  }
+  .text-outline-yellow {
+    -webkit-text-stroke: 1px #ffff00;
+    color: transparent;
+  }
+
+  @media (min-width: 768px) {
+    .text-outline-white {
+      -webkit-text-stroke: 1.5px #fff;
+    }
+    .text-outline-yellow {
+      -webkit-text-stroke: 1.5px #ffff00;
+    }
+  }
+
+  /* Body text muted */
+  .body-muted {
+    color: var(--body-text);
+    font-weight: 300;
+    line-height: 1.72;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    font-family: "Roboto", system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    background: var(--yellow);
+    color: #000;
+    padding: 14px 32px;
+    display: inline-block;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    opacity: 0.88;
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    font-family: "Roboto", system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    padding: 14px 32px;
+    display: inline-block;
+    transition: border-color 0.2s ease;
+    cursor: pointer;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Divider */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+  }
+}
+
+/* ─── Hero Darkroom Effect ─── */
+.hero-headline {
+  filter: blur(8px) contrast(0.3);
+  opacity: 0.4;
+}
+.hero-headline.developed {
+  filter: blur(0) contrast(1);
+  opacity: 1;
+  transition: filter 1.2s ease, opacity 1.2s ease;
+}
+
+/* Grain overlay */
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+/* ─── Ticker ─── */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker-scroll 20s linear infinite;
+}
+
+/* ─── Gradient pulse for hero ─── */
+@keyframes gradient-pulse {
+  0%, 100% { opacity: 0.38; }
+  50% { opacity: 0.48; }
+}
+.gradient-pulse {
+  animation: gradient-pulse 6s ease-in-out infinite;
+}
+
+/* ─── Scroll reveal ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Scrollbar hide ─── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Mobile safe area ─── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.1s !important;
+    transition-duration: 0.1s !important;
+  }
+  .ticker-track {
+    animation: none;
+  }
+  .hero-headline {
+    filter: none;
+    opacity: 1;
   }
 }

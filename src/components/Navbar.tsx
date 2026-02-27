@@ -1,25 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 const navLinks = [
-  { label: "Services", href: "/#services" },
   { label: "Work", href: "/#work" },
-  { label: "Case Studies", href: "/case-studies" },
-  { label: "Film Archive", href: "/film-archive" },
-  { label: "Polaroids", href: "/polaroid-archives" },
+  { label: "Services", href: "/#services" },
+  { label: "Systems", href: "/#systems" },
+  { label: "Archives", href: "/archives" },
 ];
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-neutral-950/80 backdrop-blur-lg">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-12">
-        <Link href="/" className="text-2xl font-bold tracking-tight">
-          <span className="gradient-text">HUE</span>{" "}
-          <span className="text-white">Unlimited</span>
+    <header
+      ref={headerRef}
+      className="fixed top-0 z-50 w-full transition-all duration-300"
+      style={{
+        borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
+        background: scrolled ? "rgba(0,0,0,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
+      }}
+    >
+      <nav className="mx-auto flex max-w-site items-center justify-between px-6 py-4 lg:px-12">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="font-display text-[18px] font-extrabold uppercase tracking-[0.04em] text-white"
+          style={{ lineHeight: 1 }}
+        >
+          HUE
         </Link>
 
         {/* Desktop nav */}
@@ -28,18 +50,22 @@ export default function Navbar() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="text-sm text-neutral-400 transition-colors hover:text-white"
+                className="nav-link font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-200"
+                style={{ color: "var(--muted)" }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "var(--white)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "var(--muted)")
+                }
               >
                 {link.label}
               </Link>
             </li>
           ))}
           <li>
-            <Link
-              href="#contact"
-              className="rounded-full bg-hue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-hue-500"
-            >
-              Get in Touch
+            <Link href="#cta" className="btn-primary">
+              Start a conversation
             </Link>
           </li>
         </ul>
@@ -51,39 +77,45 @@ export default function Navbar() {
           aria-label="Toggle menu"
         >
           <span
-            className={`block h-0.5 w-6 bg-white transition-transform ${mobileOpen ? "translate-y-2 rotate-45" : ""}`}
+            className={`block h-[1px] w-5 bg-white transition-transform ${mobileOpen ? "translate-y-[7px] rotate-45" : ""}`}
           />
           <span
-            className={`block h-0.5 w-6 bg-white transition-opacity ${mobileOpen ? "opacity-0" : ""}`}
+            className={`block h-[1px] w-5 bg-white transition-opacity ${mobileOpen ? "opacity-0" : ""}`}
           />
           <span
-            className={`block h-0.5 w-6 bg-white transition-transform ${mobileOpen ? "-translate-y-2 -rotate-45" : ""}`}
+            className={`block h-[1px] w-5 bg-white transition-transform ${mobileOpen ? "-translate-y-[7px] -rotate-45" : ""}`}
           />
         </button>
       </nav>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-white/10 bg-neutral-950 px-6 py-6 md:hidden">
-          <ul className="flex flex-col gap-4">
+        <div
+          className="border-t px-6 py-8 md:hidden"
+          style={{
+            borderColor: "var(--border)",
+            background: "rgba(0,0,0,0.95)",
+          }}
+        >
+          <ul className="flex flex-col gap-5">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="text-lg text-neutral-300 transition-colors hover:text-white"
+                  className="font-mono text-[11px] uppercase tracking-[0.14em] text-white"
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
-            <li>
+            <li className="mt-2">
               <Link
-                href="#contact"
-                className="inline-block rounded-full bg-hue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-hue-500"
+                href="#cta"
+                className="btn-primary"
                 onClick={() => setMobileOpen(false)}
               >
-                Get in Touch
+                Start a conversation
               </Link>
             </li>
           </ul>

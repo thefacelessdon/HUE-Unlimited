@@ -1,17 +1,23 @@
 import Hero from "@/components/Hero";
-import Services from "@/components/Services";
+import Ticker from "@/components/Ticker";
+import ClientLogos from "@/components/ClientLogos";
 import Work from "@/components/Work";
-import About from "@/components/About";
-import Contact from "@/components/Contact";
+import Services from "@/components/Services";
+import Systems from "@/components/Systems";
+import HowItWorks from "@/components/HowItWorks";
+import CTA from "@/components/CTA";
 
 export default function Home() {
   return (
     <>
       <Hero />
-      <Services />
+      <Ticker />
+      <ClientLogos />
       <Work />
-      <About />
-      <Contact />
+      <Services />
+      <Systems />
+      <HowItWorks />
+      <CTA />
     </>
   );
 }

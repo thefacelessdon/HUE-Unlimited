@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Play, Pause, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface MediaItem {
   url: string;
@@ -26,49 +25,65 @@ export function FilmStrip({ media }: FilmStripProps) {
 
   return (
     <div className="relative">
-      {/* Film strip header */}
-      <div className="section-padding pb-8">
-        <div className="mx-auto max-w-7xl">
-          <p className="mb-4 text-sm font-medium uppercase tracking-widest text-hue-400">
-            Film Archive
-          </p>
-          <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-            Analog <span className="gradient-text">memories</span>
+      {/* Header */}
+      <div className="px-6 pb-10 pt-12 md:px-12 lg:px-12">
+        <div className="mx-auto max-w-site">
+          <p className="section-label mb-8">Film Archive</p>
+          <h1 className="display-text mb-4 text-[clamp(36px,6vw,80px)]">
+            <span className="text-white">ANALOG</span>
+            <br />
+            <span className="text-outline-white">MEMORIES.</span>
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-neutral-400">
-            A collection of moments captured on film — raw, unfiltered, and real.
+          <p className="body-muted max-w-lg text-[15px]">
+            A collection of moments captured on film — raw, unfiltered, and
+            real.
           </p>
         </div>
       </div>
 
       {/* Scroll controls */}
-      <div className="absolute right-6 top-[7.5rem] z-10 flex gap-2 lg:right-24">
+      <div className="absolute right-6 top-14 z-10 flex gap-2 md:right-12">
         <button
           onClick={() => scroll("left")}
-          className="rounded-full border border-white/10 bg-neutral-900/80 p-2 backdrop-blur-sm transition-colors hover:border-white/30"
+          className="flex h-10 w-10 items-center justify-center border transition-colors duration-200 hover:border-white/30"
+          style={{ borderColor: "var(--border)", background: "#000" }}
+          aria-label="Scroll left"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <span style={{ color: "var(--muted)" }}>←</span>
         </button>
         <button
           onClick={() => scroll("right")}
-          className="rounded-full border border-white/10 bg-neutral-900/80 p-2 backdrop-blur-sm transition-colors hover:border-white/30"
+          className="flex h-10 w-10 items-center justify-center border transition-colors duration-200 hover:border-white/30"
+          style={{ borderColor: "var(--border)", background: "#000" }}
+          aria-label="Scroll right"
         >
-          <ChevronRight className="h-5 w-5" />
+          <span style={{ color: "var(--muted)" }}>→</span>
         </button>
       </div>
 
       {/* Film strip sprocket holes - top */}
-      <div className="flex h-6 items-center justify-around bg-neutral-900 px-4">
-        {Array.from({ length: 40 }).map((_, i) => (
-          <div key={i} className="h-3 w-5 rounded-sm bg-neutral-800" />
+      <div
+        className="flex h-6 items-center justify-around px-4"
+        style={{ background: "rgba(255,255,255,0.03)" }}
+      >
+        {Array.from({ length: 50 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-[6px] w-[10px] flex-shrink-0"
+            style={{ background: "rgba(255,255,255,0.06)" }}
+          />
         ))}
       </div>
 
       {/* Scrollable film strip */}
       <div
         ref={scrollRef}
-        className="flex gap-1 overflow-x-auto bg-neutral-900 px-1 scrollbar-hide"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        className="flex gap-1 overflow-x-auto px-1"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          background: "rgba(255,255,255,0.02)",
+        }}
       >
         {media.map((item, index) => (
           <div
@@ -77,7 +92,7 @@ export function FilmStrip({ media }: FilmStripProps) {
             style={{ width: item.type === "video" ? "500px" : "350px" }}
           >
             {item.type === "image" ? (
-              <div className="relative aspect-[3/4] overflow-hidden bg-neutral-800">
+              <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
                   src={item.url}
                   alt={`Film frame ${index + 1}`}
@@ -86,12 +101,15 @@ export function FilmStrip({ media }: FilmStripProps) {
                   sizes="350px"
                 />
                 {/* Film frame number */}
-                <div className="absolute bottom-2 right-2 font-mono text-xs text-orange-400/70">
+                <div
+                  className="absolute bottom-2 right-2 font-mono text-[9px] tracking-[0.12em]"
+                  style={{ color: "rgba(255,200,0,0.6)" }}
+                >
                   {String(index + 1).padStart(2, "0")}A
                 </div>
               </div>
             ) : (
-              <div className="relative aspect-[16/10] overflow-hidden bg-neutral-800">
+              <div className="relative aspect-[16/10] overflow-hidden">
                 <video
                   src={item.url}
                   className="h-full w-full object-cover"
@@ -105,15 +123,16 @@ export function FilmStrip({ media }: FilmStripProps) {
                 />
                 <button
                   onClick={() =>
-                    setPlayingVideo(playingVideo === item.url ? null : item.url)
+                    setPlayingVideo(
+                      playingVideo === item.url ? null : item.url
+                    )
                   }
-                  className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors hover:bg-black/10"
+                  className="absolute inset-0 flex items-center justify-center transition-colors hover:bg-black/10"
+                  style={{ background: "rgba(0,0,0,0.2)" }}
                 >
-                  {playingVideo === item.url ? (
-                    <Pause className="h-12 w-12 text-white/80" />
-                  ) : (
-                    <Play className="h-12 w-12 text-white/80" />
-                  )}
+                  <span className="display-text text-[24px] text-white">
+                    {playingVideo === item.url ? "❚❚" : "▶"}
+                  </span>
                 </button>
               </div>
             )}
@@ -122,10 +141,27 @@ export function FilmStrip({ media }: FilmStripProps) {
       </div>
 
       {/* Film strip sprocket holes - bottom */}
-      <div className="flex h-6 items-center justify-around bg-neutral-900 px-4">
-        {Array.from({ length: 40 }).map((_, i) => (
-          <div key={i} className="h-3 w-5 rounded-sm bg-neutral-800" />
+      <div
+        className="flex h-6 items-center justify-around px-4"
+        style={{ background: "rgba(255,255,255,0.03)" }}
+      >
+        {Array.from({ length: 50 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-[6px] w-[10px] flex-shrink-0"
+            style={{ background: "rgba(255,255,255,0.06)" }}
+          />
         ))}
+      </div>
+
+      {/* Frame count */}
+      <div className="px-6 py-6 md:px-12">
+        <span
+          className="font-mono text-[9px] uppercase tracking-[0.16em]"
+          style={{ color: "var(--muted)" }}
+        >
+          {media.length} frames · Various stocks · 2019–2025
+        </span>
       </div>
     </div>
   );
