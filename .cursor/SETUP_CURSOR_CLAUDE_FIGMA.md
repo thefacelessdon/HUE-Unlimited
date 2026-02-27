@@ -39,26 +39,20 @@ Claude Code ships a VS Code/Cursor extension. Install it manually (most reliable
 
 3. **Restart Cursor** fully (quit and reopen).
 
-### Step C — Connect Claude Code to Cursor
+### Step C — Use Claude Code with Cursor (no `/ide` needed)
 
-1. Open **Cursor** and open this project (your repo).
-2. Open Cursor’s **integrated terminal** (`Ctrl+`` ` or View → Terminal).
-3. Run:
-   ```bash
-   claude
-   ```
-4. In the Claude Code session, type:
-   ```
-   /ide
-   ```
-5. Choose **Cursor** when it lists IDEs. It should say the IDE is connected.
+**You don’t need to run `/ide`.** In Claude Code v2.x, the main way to use Claude with Cursor is the **extension** — that’s already “connected.”
 
-If you ever see “IDE is not connected”:
+1. **Open Claude in Cursor** (pick one):
+   - Click the **Spark icon** (top-right of the editor when a file is open).
+   - Click **✱ Claude Code** in the **bottom-right status bar** (works with no file open).
+   - Command Palette (`Cmd+Shift+P`) → type “Claude Code” → e.g. “Open in New Tab”.
 
-- Run `/ide` again in Claude Code.
-- Ensure you ran `claude` from a terminal **inside Cursor** (or from a shell where `cursor` is in PATH and Cursor is running).
+2. In that panel, Claude sees your project, open files, and selection. You’re already in sync.
 
-**Quick summon (optional):** With the extension installed, you can often open Claude Code with `Cmd+Esc` (macOS) or `Ctrl+Esc` (Windows/Linux) from Cursor.
+**About `/ide`:** In the terminal, Claude Code v2.1 may say “/ide isn’t a recognized skill.” That’s expected — `/ide` was for connecting a **terminal** session to the IDE. The **extension** is the intended integration; use the Spark icon or status bar instead of the terminal for day-to-day use.
+
+**Optional — terminal mode:** You can run `claude` in Cursor’s integrated terminal for a CLI-style session. The CLI may auto-integrate with Cursor when run from that terminal; if not, use the extension UI (Spark / status bar) for full integration.
 
 ---
 
@@ -91,9 +85,9 @@ You already have Figma MCP configured in this project.
 ## 4. Quick checklist
 
 - [ ] `cursor` in PATH (Command Palette → “Install 'cursor' command”).
-- [ ] Claude Code extension installed in Cursor (VSIX) and Cursor restarted.
-- [ ] In Cursor’s terminal: `claude` → `/ide` → Cursor selected and connected.
+- [ ] Claude Code extension installed in Cursor and Cursor restarted.
+- [ ] Open Claude via **Spark icon** or **✱ Claude Code** in status bar — that’s your connection (no `/ide` needed).
 - [ ] Settings → MCP: `figma-desktop` green when Figma Desktop is open.
-- [ ] One test: paste a Figma frame link in Cursor and ask to update the site; one test: run `claude` in Cursor’s terminal and `/ide` to confirm connection.
+- [ ] Optional test: paste a Figma frame link in Cursor chat and ask to update the site.
 
 After this, Cursor, Claude Code, and Figma are connected; use the Figma workflow from `.cursor/FIGMA_WORKFLOW.md` whenever you want to sync design → code.
