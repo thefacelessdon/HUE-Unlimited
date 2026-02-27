@@ -45,10 +45,10 @@ export default function ClientLogos() {
   }, []);
 
   return (
-    <section id="client-logos" className="px-6 py-20 md:px-12 lg:px-12">
+    <section id="client-logos" className="px-6 py-5 md:px-12 md:py-6 lg:px-12">
       <div className="mx-auto max-w-site">
-        <p className="section-label mb-12 justify-center">Trusted By</p>
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 md:gap-x-16">
+        <p className="section-label mb-4 justify-center">Trusted By</p>
+        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 md:gap-x-16">
           {clients.map((name, i) => (
             <span
               key={name}
@@ -66,12 +66,6 @@ export default function ClientLogos() {
             </span>
           ))}
         </div>
-        <p
-          className="mt-6 text-center font-mono text-[9px] uppercase tracking-[0.16em]"
-          style={{ color: "var(--muted)" }}
-        >
-          Logo assets pending — text placeholders active
-        </p>
       </div>
     </section>
   );

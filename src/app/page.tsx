@@ -11,9 +11,12 @@ import CTA from "@/components/CTA";
 export default function Home() {
   return (
     <>
-      <Hero />
-      <Ticker />
-      <ClientLogos />
+      {/* Above-the-fold: hero + ticker + logos share one viewport */}
+      <div className="flex min-h-[100svh] flex-col md:min-h-screen">
+        <Hero />
+        <Ticker />
+        <ClientLogos />
+      </div>
       <TheShift />
       <Work />
       <Services />

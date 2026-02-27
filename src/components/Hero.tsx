@@ -103,7 +103,7 @@ export default function Hero() {
   ];
 
   return (
-    <section id="hero" className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden px-6 pb-8 pt-24 md:min-h-screen md:pb-12 md:px-12 lg:px-12">
+    <section id="hero" className="relative flex flex-1 flex-col justify-between overflow-hidden px-6 pb-4 pt-24 md:pb-6 md:px-12 lg:px-12">
       {/* SVG filter for grain/noise effect */}
       <svg className="absolute h-0 w-0" aria-hidden="true">
         <defs>
@@ -163,7 +163,7 @@ export default function Hero() {
           id="hero-headline-container"
           style={{ filter: "url(#darkroom-grain)" }}
         >
-          <h1 className="display-text text-[clamp(48px,10vw,160px)]">
+          <h1 className="display-text text-[clamp(36px,6.5vw,96px)]">
             {lines.map((line, i) => (
               <span
                 key={i}
@@ -179,7 +179,7 @@ export default function Hero() {
       </div>
 
       {/* Subhead row */}
-      <div className="relative z-10 mt-10 flex items-end justify-between">
+      <div className="relative z-10 mt-4 flex items-end justify-between md:mt-6">
         <p
           ref={subRef}
           className="body-muted max-w-lg text-[14px] md:text-[15px]"
