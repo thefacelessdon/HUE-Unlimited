@@ -219,9 +219,11 @@ export default function Systems() {
           </div>
           <div className="flex items-end">
             <p className="body-muted max-w-md text-[14px] md:text-[15px]">
-              An embedded relationship only works if there&apos;s a system
-              underneath it. These are the structures that make it run — for
-              every client, from week one.
+              Cultural presence at scale doesn&apos;t happen through effort
+              alone. It requires systems — structures that make creative
+              intelligence repeatable, transferable, and compounding across
+              every engagement. These are ours. Built from the work. Running
+              from week one.
             </p>
           </div>
         </div>

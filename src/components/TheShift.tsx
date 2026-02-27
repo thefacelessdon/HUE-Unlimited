@@ -8,24 +8,30 @@ gsap.registerPlugin(ScrollTrigger);
 
 const STATEMENTS = [
   {
-    words: ["MOST", "AGENCIES", "START", "FROM", "SCRATCH.", "EVERY.", "TIME."],
+    words: ["EVERYONE", "GOT", "A", "PLATFORM."],
     emphasis: [] as number[],
+    body: "The production and distribution tools that used to give institutions their authority became free. The architecture inverted.",
   },
   {
-    words: ["WE", "EMBED.", "WE", "COMPOUND.", "WE", "STAY."],
+    words: ["TRUST", "MOVED", "FROM", "INSTITUTIONS", "TO", "COMMUNITIES."],
     emphasis: [] as number[],
+    body: "Authority doesn\u2019t flow from brands anymore. It emerges from communities \u2014 from creators who\u2019ve earned it through proximity and consistency.",
   },
   {
     words: [
       "THAT'S",
       "NOT",
       "A",
-      "CAMPAIGN.",
+      "CAMPAIGN",
+      "PROBLEM.",
       "THAT'S",
+      "A",
       "CULTURAL",
-      "PRESENCE.",
+      "PRESENCE",
+      "PROBLEM.",
     ],
-    emphasis: [5, 6], // "CULTURAL PRESENCE." in yellow
+    emphasis: [7, 8], // "CULTURAL PRESENCE" in yellow
+    body: "",
   },
 ];
 
@@ -166,28 +172,38 @@ export default function TheShift() {
               visibility: si === 0 ? "visible" : ("hidden" as const),
             }}
           >
-            <p
-              className="display-text text-center leading-[0.95]"
-              style={{ fontSize: "clamp(64px, 9vw, 144px)" }}
-            >
-              {stmt.words.map((word, wi) => (
-                <span
-                  key={wi}
-                  ref={(el) => {
-                    if (!wordRefs.current[si]) wordRefs.current[si] = [];
-                    wordRefs.current[si][wi] = el;
-                  }}
-                  style={{
-                    opacity: 0.18,
-                    color: stmt.emphasis.includes(wi) ? "#ffff00" : "#ffffff",
-                    display: "inline-block",
-                    marginRight: "0.3em",
-                  }}
+            <div className="mx-auto max-w-[1200px]">
+              <p
+                className="display-text text-center leading-[0.95]"
+                style={{ fontSize: "clamp(64px, 9vw, 144px)" }}
+              >
+                {stmt.words.map((word, wi) => (
+                  <span
+                    key={wi}
+                    ref={(el) => {
+                      if (!wordRefs.current[si]) wordRefs.current[si] = [];
+                      wordRefs.current[si][wi] = el;
+                    }}
+                    style={{
+                      opacity: 0.18,
+                      color: stmt.emphasis.includes(wi) ? "#ffff00" : "#ffffff",
+                      display: "inline-block",
+                      marginRight: "0.3em",
+                    }}
+                  >
+                    {word}
+                  </span>
+                ))}
+              </p>
+              {stmt.body && (
+                <p
+                  className="mx-auto mt-8 max-w-2xl text-center text-[14px] font-light leading-relaxed md:text-[15px]"
+                  style={{ color: "rgba(255,255,255,0.45)" }}
                 >
-                  {word}
-                </span>
-              ))}
-            </p>
+                  {stmt.body}
+                </p>
+              )}
+            </div>
           </div>
         ))}
 
@@ -213,24 +229,33 @@ export default function TheShift() {
       {/* Mobile: simple stacked statements, fully visible */}
       <div className="space-y-12 px-6 py-24 text-center md:hidden">
         {STATEMENTS.map((stmt, si) => (
-          <p
-            key={si}
-            className="display-text leading-[0.95]"
-            style={{ fontSize: "clamp(36px, 9vw, 64px)" }}
-          >
-            {stmt.words.map((word, wi) => (
-              <span
-                key={wi}
-                style={{
-                  color: stmt.emphasis.includes(wi) ? "#ffff00" : "#ffffff",
-                  display: "inline-block",
-                  marginRight: "0.25em",
-                }}
+          <div key={si}>
+            <p
+              className="display-text leading-[0.95]"
+              style={{ fontSize: "clamp(36px, 9vw, 64px)" }}
+            >
+              {stmt.words.map((word, wi) => (
+                <span
+                  key={wi}
+                  style={{
+                    color: stmt.emphasis.includes(wi) ? "#ffff00" : "#ffffff",
+                    display: "inline-block",
+                    marginRight: "0.25em",
+                  }}
+                >
+                  {word}
+                </span>
+              ))}
+            </p>
+            {stmt.body && (
+              <p
+                className="mx-auto mt-4 max-w-md text-[13px] font-light leading-relaxed"
+                style={{ color: "rgba(255,255,255,0.45)" }}
               >
-                {word}
-              </span>
-            ))}
-          </p>
+                {stmt.body}
+              </p>
+            )}
+          </div>
         ))}
         <p
           className="uppercase tracking-[0.18em]"

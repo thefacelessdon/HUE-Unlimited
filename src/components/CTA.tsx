@@ -13,6 +13,7 @@ export default function CTA() {
   const line1Ref = useRef<HTMLSpanElement>(null);
   const line2Ref = useRef<HTMLSpanElement>(null);
   const line3Ref = useRef<HTMLSpanElement>(null);
+  const bridgeRef = useRef<HTMLParagraphElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
   const noteRef = useRef<HTMLParagraphElement>(null);
@@ -27,6 +28,7 @@ export default function CTA() {
       line1Ref.current,
       line2Ref.current,
       line3Ref.current,
+      bridgeRef.current,
       bodyRef.current,
       buttonsRef.current,
       noteRef.current,
@@ -63,10 +65,15 @@ export default function CTA() {
             opacity: 1, y: 0, duration: 0.7, ease: "power3.out",
           }, 0.84);
 
+          // Bridge line fades in
+          tl.to(bridgeRef.current, {
+            opacity: 1, y: 0, duration: 0.5, ease: "power3.out",
+          }, 0.96);
+
           // Subhead fades in
           tl.to(bodyRef.current, {
             opacity: 1, y: 0, duration: 0.6, ease: "power3.out",
-          }, 1.1);
+          }, 1.14);
 
           // Buttons fade in together
           tl.to(buttonsRef.current, {
@@ -118,6 +125,14 @@ export default function CTA() {
             FROM SCRATCH.
           </span>
         </h2>
+
+        <p
+          ref={bridgeRef}
+          className="mb-10 font-mono text-[11px] font-light leading-relaxed tracking-[0.04em] md:text-[13px]"
+          style={{ color: "var(--muted)" }}
+        >
+          Cultural presence is built over time. So is the right partnership.
+        </p>
 
         <p
           ref={bodyRef}

@@ -106,21 +106,23 @@ export default function Services() {
               className="body-muted max-w-lg space-y-4 text-[14px] md:text-[15px]"
             >
               <p>
-                You&apos;re past the phase where one person does everything. But
-                you&apos;re not ready — or willing — to build and carry a full
-                in-house team.
+                The brands winning right now aren&apos;t winning on campaigns.
+                They&apos;re winning because they have genuine presence in the
+                communities that shape their audience&apos;s identity —
+                continuously, coherently, over time.
               </p>
               <p>
-                Most brands in that position end up with one of two problems: an
-                agency that relearns them on every engagement, or freelancers
-                they&apos;re managing themselves. Either way, the creative
-                director becomes the project manager.
+                Building that requires something the project-based agency model
+                wasn&apos;t designed to provide: embedded creative intelligence
+                that compounds. A team that already knows your brand, already
+                understands the communities you&apos;re in, and gets sharper the
+                longer they&apos;re in — not slower.
               </p>
               <p>
-                HUE is the third option. A standing creative layer — embedded in
-                your brand, retained for ongoing work, scaling up when the work
-                demands it. The longer we work together, the faster and sharper
-                it gets.
+                Most brands try to solve this with content volume or annual
+                re-briefs. Neither works. The cultural coherence that builds
+                real brand equity doesn&apos;t come from a brief. It comes from
+                a partner who stays in.
               </p>
             </div>
           </div>

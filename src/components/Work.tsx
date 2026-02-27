@@ -12,6 +12,7 @@ interface WorkCard {
   client: string;
   pill: string;
   title: string;
+  sublabel?: string;
   stats: string;
   tags: string[];
   bgGradient: string;
@@ -24,7 +25,8 @@ const workCards: WorkCard[] = [
     id: "01",
     client: "Spotify",
     pill: "Spotify · Embedded Partner",
-    title: "CO-BUILT FREQUENCY VIA STORYTELLING.",
+    title: "BUILT THE CULTURAL ARCHITECTURE FOR BLACK MUSIC AT GLOBAL SCALE.",
+    sublabel: "Brand system \u00b7 Content engine \u00b7 Talent framework \u00b7 Community structure \u00b7 6 regions \u00b7 One coherent voice \u00b7 3 years in",
     stats: "#1 Black Music Destination · 2.1M Followers · 250M Video Views · 6 Regions · 2× Telly Awards",
     tags: ["Global Brand Building", "Creative Direction", "Content", "Social"],
     bgGradient:
@@ -36,7 +38,8 @@ const workCards: WorkCard[] = [
     id: "02",
     client: "Disney",
     pill: "Disney / Pixar · Brand Extension",
-    title: "TOOK SOUL BEYOND THE SCREEN.",
+    title: "TURNED IP INTO A LIVING CULTURAL SYSTEM.",
+    sublabel: "Not merch. A scalable brand extension rooted in real artists \u2014 retail, parks, platform \u00b7 All running simultaneously \u00b7 Gold Telly",
     stats: "80+ SKU Catalog · Disney Parks OOH · Amazon Storefront · Gold Telly Winner",
     tags: ["Brand Identity", "Product Design", "Campaign Rollout", "Evergreen Programs"],
     bgGradient:
@@ -48,7 +51,8 @@ const workCards: WorkCard[] = [
     id: "03",
     client: "Red Bull",
     pill: "Red Bull · Music Residency",
-    title: "CURATED TALENT OF THE NEXT GENERATION.",
+    title: "BUILT THE MODEL FOR HOW GLOBAL BRANDS INVEST IN EMERGING TALENT.",
+    sublabel: "Program architecture \u00b7 Creative residency \u00b7 Collaborative EP \u00b7 The structure. Not just the event.",
     stats: "10 Rising Creators · 30+ Content Assets · Collaborative EP Executive Produced",
     tags: ["Experiential", "Content Production", "Program Development"],
     bgGradient:
@@ -59,7 +63,8 @@ const workCards: WorkCard[] = [
     id: "04",
     client: "Death Row",
     pill: "Death Row × Gamma · Artist Rollout",
-    title: "SHAPED THE NEW ERA OF DEATH ROW.",
+    title: "BUILT THE CREATIVE INFRASTRUCTURE FOR AN ARTIST AND A NEW ERA OF A LABEL.",
+    sublabel: "360 brand identity \u00b7 Day-to-day cultural intelligence \u00b7 Release architecture \u00b7 25M+ views \u00b7 #2 R&B radio \u00b7 Simultaneously",
     stats: "25M+ Video Views · #2 R&B Radio · Top 20 Mediabase · 1M+ Monthly Listeners",
     tags: ["Artist Branding", "360 Campaign", "Social", "Creative Direction"],
     bgGradient:
@@ -70,7 +75,8 @@ const workCards: WorkCard[] = [
     id: "05",
     client: "Artist Commerce",
     pill: "Anderson .Paak · MGK · Snoop Dogg",
-    title: "MADE COMMERCE FEEL LIKE CULTURE.",
+    title: "BUILT THE SYSTEMS THAT LET ARTISTS SCALE COMMERCE WITHOUT LOSING CULTURE.",
+    sublabel: "Anderson .Paak \u00b7 MGK \u00b7 Snoop Dogg \u00b7 Vans \u00b7 Hot Topic \u00b7 Amazon \u00b7 Touring retail",
     stats: "Full Brand Systems · Vans · Hot Topic · Amazon · Touring Retail",
     tags: ["Artist Commerce", "Retail", "Brand Systems"],
     bgGradient:
@@ -154,9 +160,17 @@ function WorkCardComponent({
         >
           {card.pill}
         </span>
-        <h3 className="display-text mb-3 text-[clamp(18px,3vw,32px)] text-white md:mb-4">
+        <h3 className="display-text mb-2 text-[clamp(18px,3vw,32px)] text-white md:mb-3">
           {card.title}
         </h3>
+        {card.sublabel && (
+          <p
+            className="mb-3 font-mono text-[9px] font-light tracking-[0.10em] md:mb-4 md:text-[11px]"
+            style={{ color: "rgba(255,255,255,0.45)" }}
+          >
+            {card.sublabel}
+          </p>
+        )}
         <p
           className="mb-3 font-mono text-[9px] font-light uppercase tracking-[0.12em] md:mb-4 md:text-[10px]"
           style={{ color: "var(--muted)" }}

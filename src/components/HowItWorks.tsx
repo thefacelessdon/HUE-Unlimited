@@ -33,7 +33,8 @@ export default function HowItWorks() {
             >
               A retained HUE team inside your brand. Dedicated creative lead.
               Ongoing access to our production network. Weekly syncs. The longer
-              it runs, the better it gets.
+              it runs, the sharper the cultural intelligence — and the faster
+              the work moves.
             </p>
             <ul className="mt-auto space-y-3">
               {[

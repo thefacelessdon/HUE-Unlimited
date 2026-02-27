@@ -180,14 +180,27 @@ export default function Hero() {
 
       {/* Subhead row */}
       <div className="relative z-10 mt-4 flex items-end justify-between md:mt-6">
-        <p
+        <div
           ref={subRef}
-          className="body-muted max-w-lg text-[14px] md:text-[15px]"
+          className="max-w-xl text-[14px] font-light leading-relaxed md:text-[15px]"
           style={{ opacity: 0, transform: "translateY(12px)" }}
         >
-          The embedded creative partner for brands that produce at volume
-          and can&apos;t afford to lose the thread.
-        </p>
+          <span style={{ color: "rgba(255,255,255,0.45)" }}>
+            Social changed the architecture of cultural authority.
+            Trust flows from community now — not institutions, not campaigns.
+          </span>{" "}
+          <span style={{ color: "rgba(255,255,255,0.75)" }}>
+            The brands winning understand this.
+          </span>{" "}
+          <span style={{ color: "rgba(255,255,255,0.45)" }}>
+            They&apos;re not buying bigger campaigns.
+            They&apos;re embedding creative partners who can earn and maintain
+            cultural presence over time.
+          </span>{" "}
+          <span style={{ color: "#ffffff" }}>
+            That&apos;s what HUE is built to do.
+          </span>
+        </div>
         <span
           className="hidden font-mono text-[10px] font-light uppercase tracking-[0.22em] md:block"
           style={{ color: "var(--muted)" }}
