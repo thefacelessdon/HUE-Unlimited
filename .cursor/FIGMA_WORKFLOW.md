@@ -1,5 +1,7 @@
 # Figma Desktop → Cursor → Vercel workflow
 
+For **full setup** (Cursor + Claude Code + Figma MCP together), see **`.cursor/SETUP_CURSOR_CLAUDE_FIGMA.md`**.
+
 ## Setup (one-time)
 
 1. **Figma Desktop**  
