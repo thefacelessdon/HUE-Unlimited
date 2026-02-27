@@ -2,6 +2,32 @@
 
 For **full setup** (Cursor + Claude Code + Figma MCP together), see **`.cursor/SETUP_CURSOR_CLAUDE_FIGMA.md`**.
 
+---
+
+## Sending your HUE site into Figma (code → design)
+
+You can turn the live site into **editable Figma frames** in two ways:
+
+### Option 1 — Claude Code to Figma (official)
+
+Figma’s native flow: capture the UI from a browser (production, staging, or localhost) and send it into Figma as editable frames.
+
+1. In **Claude Code** (e.g. run `claude` in Cursor’s terminal, or use the Claude Code panel), capture the page from your running site (e.g. `http://localhost:3000` or your Vercel URL).
+2. **Send or copy** the captured screen to your clipboard.
+3. **Paste** into any Figma file — it becomes an editable frame you can duplicate, refine, and share.
+4. For multi-step flows, you can capture multiple screens in one session and paste them into Figma.
+
+Details: [From Claude Code to Figma — Figma Blog](https://www.figma.com/blog/introducing-claude-code-to-figma/). Roundtrip back to code: use the Figma MCP (paste a frame link in Cursor and ask to update the site).
+
+### Option 2 — html.to.design plugin
+
+1. **Get a URL** for the site (Vercel URL or `npm run dev` → `http://localhost:3000`).
+2. **In Figma:** Plugins → search **html.to.design** → Run.
+3. Use the **URL** option and enter that URL → **Create**. The plugin turns the page into editable Figma layers.
+4. Edit in Figma, then use the “Daily workflow” below to push design changes back to code (copy frame link → Cursor → “Update the site to match this Figma frame”).
+
+---
+
 ## Setup (one-time)
 
 1. **Figma Desktop**  
