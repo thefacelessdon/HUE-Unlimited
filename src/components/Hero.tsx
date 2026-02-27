@@ -1,29 +1,132 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+gsap.registerPlugin(ScrollTrigger);
+
+/**
+ * Hero with darkroom type development.
+ * Characters appear from heavy SVG noise/grain and sharpen into the word —
+ * like a photo developing in a darkroom. One-use only, in the hero.
+ */
 export default function Hero() {
-  const headlineRef = useRef<HTMLDivElement>(null);
+  const linesRef = useRef<(HTMLSpanElement | null)[]>([]);
   const subRef = useRef<HTMLParagraphElement>(null);
+  const turbRef = useRef<SVGFETurbulenceElement>(null);
+  const filterReady = useRef(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      headlineRef.current?.classList.add("developed");
-    }, 100);
+    // Animate the SVG turbulence filter: high grain → zero grain
+    const turb = turbRef.current;
+    if (!turb) return;
 
-    const subTimer = setTimeout(() => {
-      subRef.current?.style.setProperty("opacity", "1");
-      subRef.current?.style.setProperty("transform", "translateY(0)");
-    }, 1400);
+    turb.setAttribute("baseFrequency", "0.08");
 
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(subTimer);
-    };
+    const ctx = gsap.context(() => {
+    const tl = gsap.timeline({ delay: 0.15 });
+
+    // Animate filter: grain dissolves over 1.4s
+    tl.to(
+      {},
+      {
+        duration: 1.4,
+        ease: "power2.out",
+        onUpdate: function () {
+          const progress = this.progress();
+          // Grain frequency: 0.08 → 0 (disappears)
+          const freq = 0.08 * (1 - progress);
+          turb.setAttribute("baseFrequency", String(freq));
+        },
+      },
+      0
+    );
+
+    // Stagger each line: opacity 0 → 1, slight y shift
+    linesRef.current.forEach((line, i) => {
+      if (!line) return;
+      gsap.set(line, { opacity: 0, y: 8 });
+      tl.to(
+        line,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out",
+        },
+        0.08 * i // stagger 80ms between lines
+      );
+    });
+
+    // Remove filter after animation to restore crisp text
+    tl.call(() => {
+      filterReady.current = true;
+      const container = document.getElementById("hero-headline-container");
+      if (container) container.style.filter = "none";
+    });
+
+    // Subhead fade in after headline develops
+    tl.to(
+      subRef.current,
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power2.out",
+      },
+      1.2
+    );
+
+    // Parallax: headline drifts up as hero exits viewport
+    gsap.to("#hero-headline-container", {
+      y: -60,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+      },
+    });
+    }); // end gsap.context
+
+    return () => ctx.revert();
   }, []);
 
+  const lines = [
+    { text: "WE DON'T", className: "text-white" },
+    { text: "LEARN YOUR", className: "text-white" },
+    { text: "BRAND.", className: "text-outline-white" },
+    { text: "WE BECOME", className: "text-white" },
+    { text: "PART OF IT.", className: "text-outline-yellow" },
+  ];
+
   return (
-    <section className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden px-6 pb-8 pt-24 md:min-h-screen md:pb-12 md:px-12 lg:px-12">
+    <section id="hero" className="relative flex flex-1 flex-col justify-between overflow-hidden px-6 pb-4 pt-24 md:pb-6 md:px-12 lg:px-12">
+      {/* SVG filter for grain/noise effect */}
+      <svg className="absolute h-0 w-0" aria-hidden="true">
+        <defs>
+          <filter id="darkroom-grain">
+            <feTurbulence
+              ref={turbRef}
+              type="fractalNoise"
+              baseFrequency="0.08"
+              numOctaves="4"
+              stitchTiles="stitch"
+              result="noise"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="6"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+        </defs>
+      </svg>
+
       {/* Gradient bloom — bottom 25% */}
       <div
         className="gradient-pulse pointer-events-none absolute bottom-0 left-0 right-0 h-[50vh]"
@@ -56,37 +159,48 @@ export default function Hero() {
 
       {/* Headline area — bottom-anchored */}
       <div className="relative z-10 mt-auto max-w-[1200px]">
-        <div ref={headlineRef} className="hero-headline">
-          <h1
-            className="display-text text-[clamp(48px,10vw,160px)]"
-          >
-            <span className="text-white">WE DON&apos;T</span>
-            <br />
-            <span className="text-white">LEARN YOUR</span>
-            <br />
-            <span className="text-outline-white">BRAND.</span>
-            <br />
-            <span className="text-white">WE BECOME</span>
-            <br />
-            <span className="text-outline-yellow">PART OF IT.</span>
+        <div
+          id="hero-headline-container"
+          style={{ filter: "url(#darkroom-grain)" }}
+        >
+          <h1 className="display-text text-[clamp(36px,6.5vw,96px)]">
+            {lines.map((line, i) => (
+              <span
+                key={i}
+                ref={(el) => { linesRef.current[i] = el; }}
+                className={`block ${line.className}`}
+                style={{ opacity: 0 }}
+              >
+                {line.text}
+              </span>
+            ))}
           </h1>
         </div>
       </div>
 
       {/* Subhead row */}
-      <div className="relative z-10 mt-10 flex items-end justify-between">
-        <p
+      <div className="relative z-10 mt-4 flex items-end justify-between md:mt-6">
+        <div
           ref={subRef}
-          className="body-muted max-w-lg text-[14px] md:text-[15px]"
-          style={{
-            opacity: 0,
-            transform: "translateY(12px)",
-            transition: "opacity 0.6s ease, transform 0.6s ease",
-          }}
+          className="max-w-xl text-[14px] font-light leading-relaxed md:text-[15px]"
+          style={{ opacity: 0, transform: "translateY(12px)" }}
         >
-          The embedded creative partner for brands that produce at volume
-          and can&apos;t afford to lose the thread.
-        </p>
+          <span style={{ color: "rgba(255,255,255,0.45)" }}>
+            Social changed the architecture of cultural authority.
+            Trust flows from community now — not institutions, not campaigns.
+          </span>{" "}
+          <span style={{ color: "rgba(255,255,255,0.75)" }}>
+            The brands winning understand this.
+          </span>{" "}
+          <span style={{ color: "rgba(255,255,255,0.45)" }}>
+            They&apos;re not buying bigger campaigns.
+            They&apos;re embedding creative partners who can earn and maintain
+            cultural presence over time.
+          </span>{" "}
+          <span style={{ color: "#ffffff" }}>
+            That&apos;s what HUE is built to do.
+          </span>
+        </div>
         <span
           className="hidden font-mono text-[10px] font-light uppercase tracking-[0.22em] md:block"
           style={{ color: "var(--muted)" }}

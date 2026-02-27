@@ -69,7 +69,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="grain-overlay" aria-hidden="true" />
         <ClientShell>
           <Navbar />
           <main>{children}</main>

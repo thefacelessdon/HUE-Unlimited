@@ -1,12 +1,101 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function CTA() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLParagraphElement>(null);
+  const line1Ref = useRef<HTMLSpanElement>(null);
+  const line2Ref = useRef<HTMLSpanElement>(null);
+  const line3Ref = useRef<HTMLSpanElement>(null);
+  const bridgeRef = useRef<HTMLParagraphElement>(null);
+  const bodyRef = useRef<HTMLParagraphElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+  const noteRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    // Set initial states
+    const elements = [
+      labelRef.current,
+      line1Ref.current,
+      line2Ref.current,
+      line3Ref.current,
+      bridgeRef.current,
+      bodyRef.current,
+      buttonsRef.current,
+      noteRef.current,
+    ].filter(Boolean) as HTMLElement[];
+
+    gsap.set(elements, { opacity: 0, y: 32 });
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 70%",
+        once: true,
+        onEnter: () => {
+          const tl = gsap.timeline();
+
+          // Gradient blooms in first (600ms before type) — handled by ScrollGradient keyframes
+          // Section label
+          tl.to(labelRef.current, {
+            opacity: 1, y: 0, duration: 0.6, ease: "power3.out",
+          }, 0.6);
+
+          // "STOP" rises
+          tl.to(line1Ref.current, {
+            opacity: 1, y: 0, duration: 0.7, ease: "power3.out",
+          }, 0.68);
+
+          // "STARTING" rises — 80ms later
+          tl.to(line2Ref.current, {
+            opacity: 1, y: 0, duration: 0.7, ease: "power3.out",
+          }, 0.76);
+
+          // "FROM SCRATCH." rises — 160ms later
+          tl.to(line3Ref.current, {
+            opacity: 1, y: 0, duration: 0.7, ease: "power3.out",
+          }, 0.84);
+
+          // Bridge line fades in
+          tl.to(bridgeRef.current, {
+            opacity: 1, y: 0, duration: 0.5, ease: "power3.out",
+          }, 0.96);
+
+          // Subhead fades in
+          tl.to(bodyRef.current, {
+            opacity: 1, y: 0, duration: 0.6, ease: "power3.out",
+          }, 1.14);
+
+          // Buttons fade in together
+          tl.to(buttonsRef.current, {
+            opacity: 1, y: 0, duration: 0.5, ease: "power3.out",
+          }, 1.3);
+
+          // Process note fades in last
+          tl.to(noteRef.current, {
+            opacity: 1, y: 0, duration: 0.5, ease: "power3.out",
+          }, 1.5);
+        },
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
       id="cta"
-      className="reveal relative overflow-hidden px-6 py-28 md:px-12 md:py-36 lg:px-12"
+      ref={sectionRef}
+      className="relative overflow-hidden px-6 py-28 md:px-12 md:py-36 lg:px-12"
     >
       {/* Full-width gradient band */}
       <div
@@ -21,23 +110,43 @@ export default function CTA() {
       />
 
       <div className="relative z-10 mx-auto max-w-site">
-        <p className="section-label mb-8">Ready When You Are</p>
+        <p ref={labelRef} className="section-label mb-8">
+          Ready When You Are
+        </p>
 
         <h2 className="display-text mb-10 text-[clamp(48px,9vw,140px)]">
-          <span className="text-white">STOP</span>
-          <br />
-          <span className="text-outline-white">STARTING</span>
-          <br />
-          <span className="text-outline-yellow">FROM SCRATCH.</span>
+          <span ref={line1Ref} className="block text-white">
+            STOP
+          </span>
+          <span ref={line2Ref} className="block text-outline-white">
+            STARTING
+          </span>
+          <span ref={line3Ref} className="block text-outline-yellow">
+            FROM SCRATCH.
+          </span>
         </h2>
 
-        <p className="body-muted mb-10 max-w-lg text-[14px] md:text-[16px]">
+        <p
+          ref={bridgeRef}
+          className="mb-10 font-mono text-[11px] font-light leading-relaxed tracking-[0.04em] md:text-[13px]"
+          style={{ color: "var(--muted)" }}
+        >
+          Cultural presence is built over time. So is the right partnership.
+        </p>
+
+        <p
+          ref={bodyRef}
+          className="body-muted mb-10 max-w-lg text-[14px] md:text-[16px]"
+        >
           Tell us what you&apos;re building. If there&apos;s a fit, you&apos;ll
           know from the first conversation.
         </p>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-          <Link href="mailto:creative@hueunlimited.com" className="btn-primary text-center">
+        <div ref={buttonsRef} className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+          <Link
+            href="mailto:creative@hueunlimited.com"
+            className="btn-primary text-center"
+          >
             Start a conversation →
           </Link>
           <Link href="#work" className="btn-ghost text-center">
@@ -46,6 +155,7 @@ export default function CTA() {
         </div>
 
         <p
+          ref={noteRef}
           className="mt-10 font-mono text-[9px] uppercase tracking-[0.16em]"
           style={{ color: "var(--muted)" }}
         >

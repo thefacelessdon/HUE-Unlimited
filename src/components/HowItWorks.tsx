@@ -1,6 +1,6 @@
 export default function HowItWorks() {
   return (
-    <section className="reveal px-6 py-24 md:px-12 md:py-28 lg:px-12">
+    <section id="how-it-works" className="reveal px-6 py-24 md:px-12 md:py-28 lg:px-12">
       <div className="mx-auto max-w-site">
         <p className="section-label mb-8">How It Works</p>
         <h2 className="display-text mb-16 text-[clamp(36px,5vw,72px)] text-white">
@@ -33,7 +33,8 @@ export default function HowItWorks() {
             >
               A retained HUE team inside your brand. Dedicated creative lead.
               Ongoing access to our production network. Weekly syncs. The longer
-              it runs, the better it gets.
+              it runs, the sharper the cultural intelligence — and the faster
+              the work moves.
             </p>
             <ul className="mt-auto space-y-3">
               {[

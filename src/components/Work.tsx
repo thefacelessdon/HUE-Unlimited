@@ -12,6 +12,7 @@ interface WorkCard {
   client: string;
   pill: string;
   title: string;
+  sublabel?: string;
   stats: string;
   tags: string[];
   bgGradient: string;
@@ -24,7 +25,8 @@ const workCards: WorkCard[] = [
     id: "01",
     client: "Spotify",
     pill: "Spotify · Embedded Partner",
-    title: "CO-BUILT FREQUENCY VIA STORYTELLING.",
+    title: "BUILT THE CULTURAL ARCHITECTURE FOR BLACK MUSIC AT GLOBAL SCALE.",
+    sublabel: "Brand system \u00b7 Content engine \u00b7 Talent framework \u00b7 Community structure \u00b7 6 regions \u00b7 One coherent voice \u00b7 3 years in",
     stats: "#1 Black Music Destination · 2.1M Followers · 250M Video Views · 6 Regions · 2× Telly Awards",
     tags: ["Global Brand Building", "Creative Direction", "Content", "Social"],
     bgGradient:
@@ -36,7 +38,8 @@ const workCards: WorkCard[] = [
     id: "02",
     client: "Disney",
     pill: "Disney / Pixar · Brand Extension",
-    title: "TOOK SOUL BEYOND THE SCREEN.",
+    title: "TURNED IP INTO A LIVING CULTURAL SYSTEM.",
+    sublabel: "Not merch. A scalable brand extension rooted in real artists \u2014 retail, parks, platform \u00b7 All running simultaneously \u00b7 Gold Telly",
     stats: "80+ SKU Catalog · Disney Parks OOH · Amazon Storefront · Gold Telly Winner",
     tags: ["Brand Identity", "Product Design", "Campaign Rollout", "Evergreen Programs"],
     bgGradient:
@@ -48,7 +51,8 @@ const workCards: WorkCard[] = [
     id: "03",
     client: "Red Bull",
     pill: "Red Bull · Music Residency",
-    title: "CURATED TALENT OF THE NEXT GENERATION.",
+    title: "BUILT THE MODEL FOR HOW GLOBAL BRANDS INVEST IN EMERGING TALENT.",
+    sublabel: "Program architecture \u00b7 Creative residency \u00b7 Collaborative EP \u00b7 The structure. Not just the event.",
     stats: "10 Rising Creators · 30+ Content Assets · Collaborative EP Executive Produced",
     tags: ["Experiential", "Content Production", "Program Development"],
     bgGradient:
@@ -59,7 +63,8 @@ const workCards: WorkCard[] = [
     id: "04",
     client: "Death Row",
     pill: "Death Row × Gamma · Artist Rollout",
-    title: "SHAPED THE NEW ERA OF DEATH ROW.",
+    title: "BUILT THE CREATIVE INFRASTRUCTURE FOR AN ARTIST AND A NEW ERA OF A LABEL.",
+    sublabel: "360 brand identity \u00b7 Day-to-day cultural intelligence \u00b7 Release architecture \u00b7 25M+ views \u00b7 #2 R&B radio \u00b7 Simultaneously",
     stats: "25M+ Video Views · #2 R&B Radio · Top 20 Mediabase · 1M+ Monthly Listeners",
     tags: ["Artist Branding", "360 Campaign", "Social", "Creative Direction"],
     bgGradient:
@@ -70,7 +75,8 @@ const workCards: WorkCard[] = [
     id: "05",
     client: "Artist Commerce",
     pill: "Anderson .Paak · MGK · Snoop Dogg",
-    title: "MADE COMMERCE FEEL LIKE CULTURE.",
+    title: "BUILT THE SYSTEMS THAT LET ARTISTS SCALE COMMERCE WITHOUT LOSING CULTURE.",
+    sublabel: "Anderson .Paak \u00b7 MGK \u00b7 Snoop Dogg \u00b7 Vans \u00b7 Hot Topic \u00b7 Amazon \u00b7 Touring retail",
     stats: "Full Brand Systems · Vans · Hot Topic · Amazon · Touring Retail",
     tags: ["Artist Commerce", "Retail", "Brand Systems"],
     bgGradient:
@@ -79,6 +85,7 @@ const workCards: WorkCard[] = [
   },
 ];
 
+/* ── Card with hover photo-lift effect ── */
 function WorkCardComponent({
   card,
   vertical,
@@ -86,22 +93,49 @@ function WorkCardComponent({
   card: WorkCard;
   vertical?: boolean;
 }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
   const inner = (
     <div
+      ref={cardRef}
       className="work-card group relative flex flex-col justify-end overflow-hidden border p-6 transition-colors duration-300 hover:border-white/20 md:p-8"
       style={{
         borderColor: "var(--border)",
         background: "#000",
-        width: vertical ? "100%" : "min(520px, 80vw)",
-        minHeight: vertical ? "340px" : "480px",
+        width: vertical ? "100%" : "520px",
+        height: vertical ? "340px" : "480px",
+        flexShrink: 0,
       }}
     >
+      {/* Background gradient */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{ background: card.bgGradient }}
         aria-hidden="true"
       />
 
+      {/* Photo lift layer — surfaces on hover */}
+      <div
+        className="pointer-events-none absolute inset-4 z-20 opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:-translate-y-2 group-hover:rotate-[0.8deg] md:inset-6"
+        style={{
+          background: card.bgGradient,
+          border: "1px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
+        }}
+        aria-hidden="true"
+      >
+        {/* Placeholder grid for when real photos arrive */}
+        <div className="flex h-full items-center justify-center">
+          <span
+            className="font-mono text-[9px] uppercase tracking-[0.16em]"
+            style={{ color: "rgba(255,255,255,0.2)" }}
+          >
+            ► {card.id} — AWAITING ASSET
+          </span>
+        </div>
+      </div>
+
+      {/* Watermark */}
       <span
         className="pointer-events-none absolute right-4 top-4 display-text select-none text-[clamp(36px,8vw,100px)] text-white"
         style={{ opacity: 0.06 }}
@@ -110,6 +144,7 @@ function WorkCardComponent({
         {card.watermark}
       </span>
 
+      {/* Film frame label */}
       <div
         className="absolute left-6 top-6 font-mono text-[8px] font-light uppercase tracking-[0.16em] md:left-8 md:top-8 md:text-[9px]"
         style={{ color: "var(--muted)" }}
@@ -117,6 +152,7 @@ function WorkCardComponent({
         ► {card.id} HUE ARCHIVA 400 [{card.client.toUpperCase()}]
       </div>
 
+      {/* Content */}
       <div className="relative z-10">
         <span
           className="mb-2 inline-block font-mono text-[8px] font-light uppercase tracking-[0.14em] md:mb-3 md:text-[9px]"
@@ -124,9 +160,17 @@ function WorkCardComponent({
         >
           {card.pill}
         </span>
-        <h3 className="display-text mb-3 text-[clamp(18px,3vw,32px)] text-white md:mb-4">
+        <h3 className="display-text mb-2 text-[clamp(18px,3vw,32px)] text-white md:mb-3">
           {card.title}
         </h3>
+        {card.sublabel && (
+          <p
+            className="mb-3 font-mono text-[9px] font-light tracking-[0.10em] md:mb-4 md:text-[11px]"
+            style={{ color: "rgba(255,255,255,0.45)" }}
+          >
+            {card.sublabel}
+          </p>
+        )}
         <p
           className="mb-3 font-mono text-[9px] font-light uppercase tracking-[0.12em] md:mb-4 md:text-[10px]"
           style={{ color: "var(--muted)" }}
@@ -153,64 +197,105 @@ function WorkCardComponent({
 
   if (card.href) {
     return (
-      <Link
-        href={card.href}
-        className={`block ${vertical ? "" : "flex-shrink-0"}`}
-      >
+      <Link href={card.href} className="block flex-shrink-0">
         {inner}
       </Link>
     );
   }
-  return <div className={vertical ? "" : "flex-shrink-0"}>{inner}</div>;
+  return <div className="flex-shrink-0">{inner}</div>;
+}
+
+/* ── Sprocket hole strip ── */
+function SprocketStrip() {
+  return (
+    <div className="flex shrink-0 gap-2 px-6 md:px-12" aria-hidden="true">
+      {Array.from({ length: 60 }).map((_, i) => (
+        <div
+          key={i}
+          className="h-[6px] w-[10px] flex-shrink-0"
+          style={{ background: "rgba(255,255,255,0.06)" }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export default function Work() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(true); // default mobile to avoid flash
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
+    setReady(true);
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  // Horizontal scroll via sticky + GSAP (no pin — avoids spacer/black-gap issues)
   useEffect(() => {
-    if (isMobile) return;
-    const section = sectionRef.current;
+    if (isMobile || !ready) return;
+    const wrapper = wrapperRef.current;
     const track = trackRef.current;
-    if (!section || !track) return;
+    if (!wrapper || !track) return;
 
-    const getScrollAmount = () => track.scrollWidth - window.innerWidth;
+    // Wait a frame for layout to settle
+    const raf = requestAnimationFrame(() => {
+      const scrollDistance = track.scrollWidth - window.innerWidth;
+      if (scrollDistance <= 0) return;
 
-    const ctx = gsap.context(() => {
-      gsap.to(track, {
-        x: () => -getScrollAmount(),
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: () => `+=${getScrollAmount()}`,
-          pin: true,
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            if (counterRef.current) {
-              const idx = Math.min(
-                Math.floor(self.progress * workCards.length) + 1,
-                workCards.length
-              );
-              counterRef.current.textContent = `${String(idx).padStart(2, "0")} / ${String(workCards.length).padStart(2, "0")}`;
-            }
+      // Wrapper height = one viewport (sticky container) + scroll distance
+      wrapper.style.height = `${window.innerHeight + scrollDistance}px`;
+
+      const ctx = gsap.context(() => {
+        gsap.to(track, {
+          x: -scrollDistance,
+          ease: "none",
+          scrollTrigger: {
+            trigger: wrapper,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              if (counterRef.current) {
+                const idx = Math.min(
+                  Math.floor(self.progress * workCards.length) + 1,
+                  workCards.length
+                );
+                counterRef.current.textContent = `${String(idx).padStart(2, "0")} / ${String(workCards.length).padStart(2, "0")}`;
+              }
+            },
           },
-        },
-      });
-    }, section);
+        });
+      }, wrapper);
 
-    return () => ctx.revert();
-  }, [isMobile]);
+      (wrapper as HTMLDivElement & { _gsapCtx?: gsap.Context })._gsapCtx = ctx;
+    });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      const w = wrapperRef.current;
+      const ctx = (w as HTMLDivElement & { _gsapCtx?: gsap.Context } | null)?._gsapCtx;
+      ctx?.revert();
+      if (w) w.style.height = "";
+    };
+  }, [isMobile, ready]);
+
+  // SSR / pre-hydration: render nothing to avoid layout mismatch
+  if (!ready) {
+    return (
+      <section id="work" className="px-6 py-20 md:px-12">
+        <p className="section-label mb-4">The Work</p>
+        <h2 className="display-text mb-8 text-[28px] text-white md:text-[clamp(36px,5vw,64px)]">
+          SELECTED PROJECTS
+        </h2>
+      </section>
+    );
+  }
 
   /* ── Mobile: vertical stack ── */
   if (isMobile) {
@@ -236,88 +321,75 @@ export default function Work() {
     );
   }
 
-  /* ── Desktop: horizontal GSAP scroll ── */
+  /* ── Desktop: horizontal scroll via sticky (no GSAP pin) ── */
   return (
-    <section
-      id="work"
-      ref={sectionRef}
-      className="relative overflow-hidden"
-      style={{ minHeight: "100vh" }}
-    >
-      <div className="flex items-end justify-between px-6 pb-8 pt-24 md:px-12 lg:px-12">
-        <div>
-          <p className="section-label mb-4">The Work</p>
-          <h2 className="display-text text-[clamp(36px,5vw,64px)] text-white">
-            SELECTED PROJECTS
-          </h2>
+    <div id="work" ref={wrapperRef} className="relative">
+      {/* Sticky container stays in view while wrapper scrolls */}
+      <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden bg-black">
+        {/* Header */}
+        <div className="flex shrink-0 items-end justify-between px-6 pb-6 md:px-12 lg:px-12">
+          <div>
+            <p className="section-label mb-4">The Work</p>
+            <h2 className="display-text text-[clamp(36px,5vw,64px)] text-white">
+              SELECTED PROJECTS
+            </h2>
+          </div>
+          <div className="flex items-center gap-6">
+            <span
+              ref={counterRef}
+              className="font-mono text-[11px] font-light uppercase tracking-[0.14em]"
+              style={{ color: "var(--muted)" }}
+            >
+              01 / {String(workCards.length).padStart(2, "0")}
+            </span>
+            <span
+              className="font-mono text-[10px] font-light uppercase tracking-[0.14em]"
+              style={{ color: "var(--muted)" }}
+            >
+              Scroll →
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-6">
-          <span
-            ref={counterRef}
-            className="font-mono text-[11px] font-light uppercase tracking-[0.14em]"
-            style={{ color: "var(--muted)" }}
-          >
-            01 / {String(workCards.length).padStart(2, "0")}
-          </span>
-          <span
-            className="font-mono text-[10px] font-light uppercase tracking-[0.14em]"
-            style={{ color: "var(--muted)" }}
-          >
-            Scroll →
-          </span>
-        </div>
-      </div>
 
-      <div className="mx-6 mb-4 flex gap-2 md:mx-12" aria-hidden="true">
-        {Array.from({ length: 60 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-[6px] w-[10px] flex-shrink-0"
-            style={{ background: "rgba(255,255,255,0.06)" }}
-          />
-        ))}
-      </div>
+        {/* Top sprocket holes */}
+        <SprocketStrip />
 
-      <div
-        ref={trackRef}
-        className="flex gap-4 px-6 md:px-12"
-        style={{ willChange: "transform" }}
-      >
-        {workCards.map((card) => (
-          <WorkCardComponent key={card.id} card={card} />
-        ))}
+        {/* Horizontal scroll track */}
         <div
-          className="flex flex-shrink-0 flex-col items-center justify-center border p-8"
-          style={{
-            borderColor: "var(--border)",
-            background: "#000",
-            width: "min(520px, 80vw)",
-            minHeight: "480px",
-          }}
+          ref={trackRef}
+          className="flex shrink-0 items-stretch gap-4 px-6 py-4 md:px-12"
+          style={{ willChange: "transform" }}
         >
-          <span className="display-text text-outline-yellow mb-6 text-center text-[clamp(24px,4vw,48px)]">
-            SEE ALL
-            <br />
-            WORK →
-          </span>
-          <span
-            className="font-mono text-[10px] font-light uppercase tracking-[0.14em]"
-            style={{ color: "var(--muted)" }}
-          >
-            View full portfolio
-          </span>
-        </div>
-      </div>
-
-      <div className="mx-6 mt-4 flex gap-2 md:mx-12" aria-hidden="true">
-        {Array.from({ length: 60 }).map((_, i) => (
+          {workCards.map((card) => (
+            <WorkCardComponent key={card.id} card={card} />
+          ))}
+          {/* End card — CTA */}
           <div
-            key={i}
-            className="h-[6px] w-[10px] flex-shrink-0"
-            style={{ background: "rgba(255,255,255,0.06)" }}
-          />
-        ))}
+            className="flex flex-shrink-0 flex-col items-center justify-center border p-8"
+            style={{
+              borderColor: "var(--border)",
+              background: "#000",
+              width: "520px",
+              height: "480px",
+            }}
+          >
+            <span className="display-text text-outline-yellow mb-6 text-center text-[clamp(24px,4vw,48px)]">
+              SEE ALL
+              <br />
+              WORK →
+            </span>
+            <span
+              className="font-mono text-[10px] font-light uppercase tracking-[0.14em]"
+              style={{ color: "var(--muted)" }}
+            >
+              View full portfolio
+            </span>
+          </div>
+        </div>
+
+        {/* Bottom sprocket holes */}
+        <SprocketStrip />
       </div>
-    </section>
+    </div>
   );
 }
