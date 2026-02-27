@@ -143,15 +143,7 @@
 }
 
 /* ─── Hero Darkroom Effect ─── */
-.hero-headline {
-  filter: blur(8px) contrast(0.3);
-  opacity: 0.4;
-}
-.hero-headline.developed {
-  filter: blur(0) contrast(1);
-  opacity: 1;
-  transition: filter 1.2s ease, opacity 1.2s ease;
-}
+/* Handled by SVG feTurbulence filter + GSAP in Hero.tsx */
 
 /* Grain overlay */
 .grain-overlay {

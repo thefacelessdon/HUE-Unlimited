@@ -1,29 +1,118 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 
+/**
+ * Hero with darkroom type development.
+ * Characters appear from heavy SVG noise/grain and sharpen into the word —
+ * like a photo developing in a darkroom. One-use only, in the hero.
+ */
 export default function Hero() {
-  const headlineRef = useRef<HTMLDivElement>(null);
+  const linesRef = useRef<(HTMLSpanElement | null)[]>([]);
   const subRef = useRef<HTMLParagraphElement>(null);
+  const turbRef = useRef<SVGFETurbulenceElement>(null);
+  const filterReady = useRef(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      headlineRef.current?.classList.add("developed");
-    }, 100);
+    // Animate the SVG turbulence filter: high grain → zero grain
+    const turb = turbRef.current;
+    if (!turb) return;
 
-    const subTimer = setTimeout(() => {
-      subRef.current?.style.setProperty("opacity", "1");
-      subRef.current?.style.setProperty("transform", "translateY(0)");
-    }, 1400);
+    // Start with heavy grain
+    turb.setAttribute("baseFrequency", "0.08");
+
+    const tl = gsap.timeline({ delay: 0.15 });
+
+    // Animate filter: grain dissolves over 1.4s
+    tl.to(
+      {},
+      {
+        duration: 1.4,
+        ease: "power2.out",
+        onUpdate: function () {
+          const progress = this.progress();
+          // Grain frequency: 0.08 → 0 (disappears)
+          const freq = 0.08 * (1 - progress);
+          turb.setAttribute("baseFrequency", String(freq));
+        },
+      },
+      0
+    );
+
+    // Stagger each line: opacity 0 → 1, slight y shift
+    linesRef.current.forEach((line, i) => {
+      if (!line) return;
+      gsap.set(line, { opacity: 0, y: 8 });
+      tl.to(
+        line,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out",
+        },
+        0.08 * i // stagger 80ms between lines
+      );
+    });
+
+    // Remove filter after animation to restore crisp text
+    tl.call(() => {
+      filterReady.current = true;
+      const container = document.getElementById("hero-headline-container");
+      if (container) container.style.filter = "none";
+    });
+
+    // Subhead fade in after headline develops
+    tl.to(
+      subRef.current,
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power2.out",
+      },
+      1.2
+    );
 
     return () => {
-      clearTimeout(timer);
-      clearTimeout(subTimer);
+      tl.kill();
     };
   }, []);
 
+  const lines = [
+    { text: "WE DON'T", className: "text-white" },
+    { text: "LEARN YOUR", className: "text-white" },
+    { text: "BRAND.", className: "text-outline-white" },
+    { text: "WE BECOME", className: "text-white" },
+    { text: "PART OF IT.", className: "text-outline-yellow" },
+  ];
+
   return (
     <section className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden px-6 pb-8 pt-24 md:min-h-screen md:pb-12 md:px-12 lg:px-12">
+      {/* SVG filter for grain/noise effect */}
+      <svg className="absolute h-0 w-0" aria-hidden="true">
+        <defs>
+          <filter id="darkroom-grain">
+            <feTurbulence
+              ref={turbRef}
+              type="fractalNoise"
+              baseFrequency="0.08"
+              numOctaves="4"
+              stitchTiles="stitch"
+              result="noise"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="6"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+        </defs>
+      </svg>
+
       {/* Gradient bloom — bottom 25% */}
       <div
         className="gradient-pulse pointer-events-none absolute bottom-0 left-0 right-0 h-[50vh]"
@@ -56,19 +145,21 @@ export default function Hero() {
 
       {/* Headline area — bottom-anchored */}
       <div className="relative z-10 mt-auto max-w-[1200px]">
-        <div ref={headlineRef} className="hero-headline">
-          <h1
-            className="display-text text-[clamp(48px,10vw,160px)]"
-          >
-            <span className="text-white">WE DON&apos;T</span>
-            <br />
-            <span className="text-white">LEARN YOUR</span>
-            <br />
-            <span className="text-outline-white">BRAND.</span>
-            <br />
-            <span className="text-white">WE BECOME</span>
-            <br />
-            <span className="text-outline-yellow">PART OF IT.</span>
+        <div
+          id="hero-headline-container"
+          style={{ filter: "url(#darkroom-grain)" }}
+        >
+          <h1 className="display-text text-[clamp(48px,10vw,160px)]">
+            {lines.map((line, i) => (
+              <span
+                key={i}
+                ref={(el) => { linesRef.current[i] = el; }}
+                className={`block ${line.className}`}
+                style={{ opacity: 0 }}
+              >
+                {line.text}
+              </span>
+            ))}
           </h1>
         </div>
       </div>
@@ -78,11 +169,7 @@ export default function Hero() {
         <p
           ref={subRef}
           className="body-muted max-w-lg text-[14px] md:text-[15px]"
-          style={{
-            opacity: 0,
-            transform: "translateY(12px)",
-            transition: "opacity 0.6s ease, transform 0.6s ease",
-          }}
+          style={{ opacity: 0, transform: "translateY(12px)" }}
         >
           The embedded creative partner for brands that produce at volume
           and can&apos;t afford to lose the thread.

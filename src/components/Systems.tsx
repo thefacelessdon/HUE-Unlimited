@@ -13,86 +13,130 @@ const systems: SystemItem[] = [
   {
     id: "01",
     name: "Brand Immersion Protocol",
-    description: "How we absorb a brand before we make anything",
+    description: "HOW WE ABSORB A BRAND BEFORE WE MAKE ANYTHING",
     access: "PUBLIC",
   },
   {
     id: "02",
     name: "Embedded Operating Model",
-    description: "What the retainer looks like, day to day",
+    description: "WHAT THE RETAINER LOOKS LIKE, DAY TO DAY",
     access: "PUBLIC",
   },
   {
     id: "03",
     name: "Creative Brief Framework",
-    description: "The brief structure we run on every project",
+    description: "THE BRIEF STRUCTURE WE RUN ON EVERY PROJECT",
     access: "CLIENTS ONLY",
   },
   {
     id: "04",
     name: "Talent Network & Capacity Model",
-    description: "How we scale without fixed overhead",
+    description: "HOW WE SCALE WITHOUT FIXED OVERHEAD",
     access: "CLIENTS ONLY",
   },
   {
     id: "05",
     name: "Monthly Value Report",
-    description: "How we keep the partnership visible",
+    description: "HOW WE KEEP THE PARTNERSHIP VISIBLE",
     access: "CLIENTS ONLY",
   },
 ];
 
-function typeOut(el: HTMLElement, text: string, speed = 28) {
+/**
+ * Types out text character by character into an element.
+ * Returns array of timeout IDs for cleanup.
+ */
+function typeOut(el: HTMLElement, text: string, speed = 24): number[] {
   el.textContent = "";
+  el.style.textDecoration = "none";
+  const ids: number[] = [];
   const chars = Array.from(text);
   chars.forEach((char, i) => {
-    setTimeout(() => {
+    const id = window.setTimeout(() => {
       el.textContent += char;
     }, i * speed);
+    ids.push(id);
   });
-  return chars.length * speed;
+  return ids;
 }
 
-function redact(el: HTMLElement, speed = 28) {
-  const redacted = "— — — — — — — — —";
-  el.textContent = "";
-  const chars = Array.from(redacted);
-  chars.forEach((char, i) => {
-    setTimeout(() => {
-      el.textContent += char;
-    }, i * speed);
-  });
+/**
+ * For CLIENTS ONLY items: after typing, strike through the text,
+ * pause, then replace with redaction dashes.
+ */
+function strikeAndRedact(
+  el: HTMLElement,
+  startDelay: number
+): number[] {
+  const ids: number[] = [];
+
+  // Step 1: add strikethrough
+  ids.push(
+    window.setTimeout(() => {
+      el.style.textDecoration = "line-through";
+      el.style.textDecorationColor = "rgba(255,255,255,0.4)";
+    }, startDelay)
+  );
+
+  // Step 2: replace with redaction dashes
+  ids.push(
+    window.setTimeout(() => {
+      el.style.textDecoration = "none";
+      el.textContent = "";
+      const redacted = "— — — — — — —";
+      const chars = Array.from(redacted);
+      chars.forEach((char, i) => {
+        ids.push(
+          window.setTimeout(() => {
+            el.textContent += char;
+          }, i * 18)
+        );
+      });
+    }, startDelay + 350)
+  );
+
+  return ids;
 }
 
 function SystemRow({ system }: { system: SystemItem }) {
   const descRef = useRef<HTMLSpanElement>(null);
   const timeoutsRef = useRef<number[]>([]);
 
+  const clearAll = useCallback(() => {
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+  }, []);
+
   const handleEnter = useCallback(() => {
     if (!descRef.current) return;
-    // Clear any pending timeouts
-    timeoutsRef.current.forEach(clearTimeout);
-    timeoutsRef.current = [];
+    clearAll();
 
-    const duration = typeOut(descRef.current, system.description);
+    // Type out the description in all-caps Roboto
+    const typeIds = typeOut(descRef.current, system.description, 24);
+    timeoutsRef.current.push(...typeIds);
 
+    // For CLIENTS ONLY: strike through then redact
     if (system.access === "CLIENTS ONLY") {
-      const id = window.setTimeout(() => {
-        if (descRef.current) redact(descRef.current);
-      }, duration + 400);
-      timeoutsRef.current.push(id);
+      const typeDuration = system.description.length * 24;
+      const redactIds = strikeAndRedact(
+        descRef.current,
+        typeDuration + 300
+      );
+      timeoutsRef.current.push(...redactIds);
     }
-  }, [system]);
+  }, [system, clearAll]);
 
   const handleLeave = useCallback(() => {
-    timeoutsRef.current.forEach(clearTimeout);
-    timeoutsRef.current = [];
-    if (descRef.current) descRef.current.textContent = "";
-  }, []);
+    clearAll();
+    if (descRef.current) {
+      descRef.current.textContent = "";
+      descRef.current.style.textDecoration = "none";
+    }
+  }, [clearAll]);
 
   return (
     <div
-      className="group flex cursor-pointer items-center gap-6 border-b py-6 transition-all duration-200 hover:translate-x-1.5 md:gap-8"
+      className="group flex cursor-pointer items-center gap-4 border-b py-5 transition-all duration-200 hover:translate-x-1.5 md:gap-6 md:py-6 lg:gap-8"
       style={{ borderColor: "var(--border)" }}
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
@@ -106,17 +150,22 @@ function SystemRow({ system }: { system: SystemItem }) {
       </span>
 
       {/* Name */}
-      <span className="display-text flex-1 text-[clamp(18px,2.5vw,28px)] transition-colors duration-200 group-hover:text-white"
+      <span
+        className="display-text flex-1 text-[clamp(16px,2.5vw,28px)] transition-colors duration-200 group-hover:text-white"
         style={{ color: "rgba(255,255,255,0.5)" }}
       >
         {system.name}
       </span>
 
-      {/* Typewriter description area */}
+      {/* Typewriter description — Roboto, uppercase, terminal-style */}
       <span
         ref={descRef}
-        className="hidden w-[280px] shrink-0 text-right font-mono text-[10px] font-light uppercase tracking-[0.12em] lg:inline-block"
-        style={{ color: "var(--muted)", minHeight: "1.2em" }}
+        className="hidden w-[300px] shrink-0 text-right font-mono text-[10px] font-light uppercase tracking-[0.12em] lg:inline-block"
+        style={{
+          color: "var(--muted)",
+          minHeight: "1.2em",
+          transition: "text-decoration-color 0.2s ease",
+        }}
       />
 
       {/* Badge */}

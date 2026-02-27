@@ -79,6 +79,7 @@ const workCards: WorkCard[] = [
   },
 ];
 
+/* ── Card with hover photo-lift effect ── */
 function WorkCardComponent({
   card,
   vertical,
@@ -86,22 +87,49 @@ function WorkCardComponent({
   card: WorkCard;
   vertical?: boolean;
 }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
   const inner = (
     <div
+      ref={cardRef}
       className="work-card group relative flex flex-col justify-end overflow-hidden border p-6 transition-colors duration-300 hover:border-white/20 md:p-8"
       style={{
         borderColor: "var(--border)",
         background: "#000",
-        width: vertical ? "100%" : "min(520px, 80vw)",
-        minHeight: vertical ? "340px" : "480px",
+        width: vertical ? "100%" : "520px",
+        height: vertical ? "340px" : "480px",
+        flexShrink: 0,
       }}
     >
+      {/* Background gradient */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{ background: card.bgGradient }}
         aria-hidden="true"
       />
 
+      {/* Photo lift layer — surfaces on hover */}
+      <div
+        className="pointer-events-none absolute inset-4 z-20 opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:-translate-y-2 group-hover:rotate-[0.8deg] md:inset-6"
+        style={{
+          background: card.bgGradient,
+          border: "1px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
+        }}
+        aria-hidden="true"
+      >
+        {/* Placeholder grid for when real photos arrive */}
+        <div className="flex h-full items-center justify-center">
+          <span
+            className="font-mono text-[9px] uppercase tracking-[0.16em]"
+            style={{ color: "rgba(255,255,255,0.2)" }}
+          >
+            ► {card.id} — AWAITING ASSET
+          </span>
+        </div>
+      </div>
+
+      {/* Watermark */}
       <span
         className="pointer-events-none absolute right-4 top-4 display-text select-none text-[clamp(36px,8vw,100px)] text-white"
         style={{ opacity: 0.06 }}
@@ -110,6 +138,7 @@ function WorkCardComponent({
         {card.watermark}
       </span>
 
+      {/* Film frame label */}
       <div
         className="absolute left-6 top-6 font-mono text-[8px] font-light uppercase tracking-[0.16em] md:left-8 md:top-8 md:text-[9px]"
         style={{ color: "var(--muted)" }}
@@ -117,6 +146,7 @@ function WorkCardComponent({
         ► {card.id} HUE ARCHIVA 400 [{card.client.toUpperCase()}]
       </div>
 
+      {/* Content */}
       <div className="relative z-10">
         <span
           className="mb-2 inline-block font-mono text-[8px] font-light uppercase tracking-[0.14em] md:mb-3 md:text-[9px]"
@@ -153,64 +183,103 @@ function WorkCardComponent({
 
   if (card.href) {
     return (
-      <Link
-        href={card.href}
-        className={`block ${vertical ? "" : "flex-shrink-0"}`}
-      >
+      <Link href={card.href} className="block flex-shrink-0">
         {inner}
       </Link>
     );
   }
-  return <div className={vertical ? "" : "flex-shrink-0"}>{inner}</div>;
+  return <div className="flex-shrink-0">{inner}</div>;
+}
+
+/* ── Sprocket hole strip ── */
+function SprocketStrip() {
+  return (
+    <div className="flex shrink-0 gap-2 px-6 md:px-12" aria-hidden="true">
+      {Array.from({ length: 60 }).map((_, i) => (
+        <div
+          key={i}
+          className="h-[6px] w-[10px] flex-shrink-0"
+          style={{ background: "rgba(255,255,255,0.06)" }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export default function Work() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(true); // default mobile to avoid flash
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
+    setReady(true);
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  // GSAP horizontal scroll — desktop only
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || !ready) return;
     const section = sectionRef.current;
     const track = trackRef.current;
     if (!section || !track) return;
 
-    const getScrollAmount = () => track.scrollWidth - window.innerWidth;
+    // Wait a frame for layout to settle
+    const raf = requestAnimationFrame(() => {
+      const scrollAmount = track.scrollWidth - window.innerWidth;
+      if (scrollAmount <= 0) return;
 
-    const ctx = gsap.context(() => {
-      gsap.to(track, {
-        x: () => -getScrollAmount(),
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: () => `+=${getScrollAmount()}`,
-          pin: true,
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            if (counterRef.current) {
-              const idx = Math.min(
-                Math.floor(self.progress * workCards.length) + 1,
-                workCards.length
-              );
-              counterRef.current.textContent = `${String(idx).padStart(2, "0")} / ${String(workCards.length).padStart(2, "0")}`;
-            }
+      const ctx = gsap.context(() => {
+        gsap.to(track, {
+          x: -scrollAmount,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: `+=${scrollAmount}`,
+            pin: true,
+            scrub: 0.6,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              if (counterRef.current) {
+                const idx = Math.min(
+                  Math.floor(self.progress * workCards.length) + 1,
+                  workCards.length
+                );
+                counterRef.current.textContent = `${String(idx).padStart(2, "0")} / ${String(workCards.length).padStart(2, "0")}`;
+              }
+            },
           },
-        },
-      });
-    }, section);
+        });
+      }, section);
 
-    return () => ctx.revert();
-  }, [isMobile]);
+      // Store cleanup on the section for the effect teardown
+      (section as HTMLElement & { _gsapCtx?: gsap.Context })._gsapCtx = ctx;
+    });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      const ctx = (sectionRef.current as HTMLElement & { _gsapCtx?: gsap.Context } | null)?._gsapCtx;
+      ctx?.revert();
+    };
+  }, [isMobile, ready]);
+
+  // SSR / pre-hydration: render nothing to avoid layout mismatch
+  if (!ready) {
+    return (
+      <section id="work" className="px-6 py-20 md:px-12">
+        <p className="section-label mb-4">The Work</p>
+        <h2 className="display-text mb-8 text-[28px] text-white md:text-[clamp(36px,5vw,64px)]">
+          SELECTED PROJECTS
+        </h2>
+      </section>
+    );
+  }
 
   /* ── Mobile: vertical stack ── */
   if (isMobile) {
@@ -241,10 +310,10 @@ export default function Work() {
     <section
       id="work"
       ref={sectionRef}
-      className="relative overflow-hidden"
-      style={{ minHeight: "100vh" }}
+      className="relative flex h-screen flex-col justify-center overflow-hidden"
     >
-      <div className="flex items-end justify-between px-6 pb-8 pt-24 md:px-12 lg:px-12">
+      {/* Header */}
+      <div className="flex shrink-0 items-end justify-between px-6 pb-6 md:px-12 lg:px-12">
         <div>
           <p className="section-label mb-4">The Work</p>
           <h2 className="display-text text-[clamp(36px,5vw,64px)] text-white">
@@ -268,31 +337,26 @@ export default function Work() {
         </div>
       </div>
 
-      <div className="mx-6 mb-4 flex gap-2 md:mx-12" aria-hidden="true">
-        {Array.from({ length: 60 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-[6px] w-[10px] flex-shrink-0"
-            style={{ background: "rgba(255,255,255,0.06)" }}
-          />
-        ))}
-      </div>
+      {/* Top sprocket holes */}
+      <SprocketStrip />
 
+      {/* Horizontal scroll track */}
       <div
         ref={trackRef}
-        className="flex gap-4 px-6 md:px-12"
+        className="flex shrink-0 items-stretch gap-4 px-6 py-4 md:px-12"
         style={{ willChange: "transform" }}
       >
         {workCards.map((card) => (
           <WorkCardComponent key={card.id} card={card} />
         ))}
+        {/* End card — CTA */}
         <div
           className="flex flex-shrink-0 flex-col items-center justify-center border p-8"
           style={{
             borderColor: "var(--border)",
             background: "#000",
-            width: "min(520px, 80vw)",
-            minHeight: "480px",
+            width: "520px",
+            height: "480px",
           }}
         >
           <span className="display-text text-outline-yellow mb-6 text-center text-[clamp(24px,4vw,48px)]">
@@ -309,15 +373,8 @@ export default function Work() {
         </div>
       </div>
 
-      <div className="mx-6 mt-4 flex gap-2 md:mx-12" aria-hidden="true">
-        {Array.from({ length: 60 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-[6px] w-[10px] flex-shrink-0"
-            style={{ background: "rgba(255,255,255,0.06)" }}
-          />
-        ))}
-      </div>
+      {/* Bottom sprocket holes */}
+      <SprocketStrip />
     </section>
   );
 }
