@@ -142,6 +142,15 @@
   }
 }
 
+/* ─── Gradient layering — content sits above fixed gradient ─── */
+section,
+nav,
+footer,
+main > div {
+  position: relative;
+  z-index: 1;
+}
+
 /* ─── Hero Darkroom Effect ─── */
 /* Handled by SVG feTurbulence filter + GSAP in Hero.tsx */
 
